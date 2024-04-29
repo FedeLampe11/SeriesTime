@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">App3</string>
+    <string name="web_id">1081092170931-r4tsgt9qvkicic9s6hucl386ukm8775m.apps.googleusercontent.com</string>
+
+    <string name="facebook_app_id">1411907069691441</string>
+    <string name="fb_login_protocol_scheme">fb1411907069691441</string>
+    <string name="facebook_client_token">d3d95a62bc4a7b0f9425f8ffcb6b48fb</string>
+
+</resources>
