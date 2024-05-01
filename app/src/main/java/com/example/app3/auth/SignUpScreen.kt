@@ -2,10 +2,12 @@ package com.example.app3.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -34,12 +37,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.accessibility.AccessibilityViewCommand.MoveHtmlArguments
@@ -47,6 +52,7 @@ import androidx.navigation.NavController
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.R
+import com.example.app3.ui.theme.inter_font
 
 @Composable
 fun SignUpScreen(navController: NavController, vm: FbViewModel) {
@@ -61,13 +67,8 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
     var errorCP by remember { mutableStateOf(false) }
     var errorC by remember { mutableStateOf(false) }
     var pLenght by remember { mutableStateOf(false) }
-
-    Image(
-        painter = painterResource(id = R.drawable.cosenza),
-        contentDescription = null,
-        contentScale = ContentScale.FillBounds,
-        modifier = Modifier.fillMaxSize()
-    )
+    
+    /*
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
@@ -76,29 +77,35 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
         if (vm.inProgress.value)
             CircularProgressIndicator()
     }
+    */
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 150.dp)
+            .background(Color.Black)
             .verticalScroll(
                 rememberScrollState()
             )
     ) {
+        Spacer(modifier = Modifier.height(250.dp))
+        
         Text(
-            text = "User SignUp",
+            text = "Sign Up",
             color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 40.sp
+            fontWeight = FontWeight(700),
+            fontSize = 60.sp,
+            fontFamily = inter_font,
+            modifier = Modifier.padding(end = 80.dp)
         )
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         if (errorE) {
             Text(
                 text = "Enter email",
                 color = Color.Red,
-                modifier = Modifier.padding(end = 100.dp)
+                fontFamily = inter_font,
+                textAlign = TextAlign.Center
             )
         }
         TextField(
@@ -106,8 +113,14 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             onValueChange = {
                 email = it
             },
-            label = {
-                Text(text = "Email")
+            placeholder = {
+                Text(
+                    text = "E-mail",
+                    fontFamily = inter_font,
+                    color = Color.LightGray,
+                    fontWeight = FontWeight(500),
+                    fontSize = 26.sp
+                )
             },
             leadingIcon = {
                 Icon(
@@ -128,35 +141,37 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             ),
             singleLine = true,
             textStyle = TextStyle(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                color = Color.LightGray,
+                fontFamily = inter_font,
+                fontWeight = FontWeight(500),
+                fontSize = 26.sp
             ),
-            shape = RoundedCornerShape(50.dp),
             modifier = Modifier
-                .width(300.dp)
-                .height(50.dp),
+                .width(304.dp)
+                .height(62.dp),
             colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                cursorColor = Color.Red,
-                //containerColor = Color(0x30FFFFFF),
-                focusedLeadingIconColor = Color.White,
-                unfocusedLeadingIconColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White,
-                focusedTrailingIconColor = Color.White,
-                unfocusedTrailingIconColor = Color.White
+                unfocusedIndicatorColor = Color(0xFF202027),
+                focusedIndicatorColor = Color.LightGray,
+                cursorColor = Color.White,
+                focusedContainerColor = Color(0x30FFFFFF),
+                unfocusedContainerColor = Color(0xFF202027),
+                focusedLeadingIconColor = Color.LightGray,
+                unfocusedLeadingIconColor = Color.LightGray,
+                focusedLabelColor = Color.LightGray,
+                unfocusedLabelColor = Color.LightGray,
+                focusedTrailingIconColor = Color.LightGray,
+                unfocusedTrailingIconColor = Color.LightGray,
             )
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (errorP) {
             Text(
                 text = "Enter Password",
+                fontFamily = inter_font,
                 color = Color.Red,
-                modifier = Modifier.padding(end = 100.dp)
+                textAlign = TextAlign.Center,
             )
         }
         if (pLenght) {
@@ -172,8 +187,14 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
                 password = it
                 pLenght = it.length < 6
             },
-            label = {
-                Text(text = "Password")
+            placeholder = {
+                Text(
+                    text = "Password",
+                    fontFamily = inter_font,
+                    color = Color.LightGray,
+                    fontWeight = FontWeight(500),
+                    fontSize = 26.sp
+                )
             },
             leadingIcon = {
                 Icon(
@@ -208,32 +229,34 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             ),
             singleLine = true,
             textStyle = TextStyle(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                color = Color.LightGray,
+                fontFamily = inter_font,
+                fontWeight = FontWeight(500),
+                fontSize = 26.sp
             ),
-            shape = RoundedCornerShape(50.dp),
             modifier = Modifier
-                .width(300.dp)
-                .height(50.dp),
+                .width(304.dp)
+                .height(62.dp),
             colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                cursorColor = Color.Red,
-                //containerColor = Color(0x30FFFFFF),
-                focusedLeadingIconColor = Color.White,
-                unfocusedLeadingIconColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White,
-                focusedTrailingIconColor = Color.White,
-                unfocusedTrailingIconColor = Color.White
+                unfocusedIndicatorColor = Color(0xFF202027),
+                focusedIndicatorColor = Color.LightGray,
+                cursorColor = Color.White,
+                focusedContainerColor = Color(0x30FFFFFF),
+                unfocusedContainerColor = Color(0xFF202027),
+                focusedLeadingIconColor = Color.LightGray,
+                unfocusedLeadingIconColor = Color.LightGray,
+                focusedLabelColor = Color.LightGray,
+                unfocusedLabelColor = Color.LightGray,
+                focusedTrailingIconColor = Color.LightGray,
+                unfocusedTrailingIconColor = Color.LightGray,
             )
         )
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         if (errorCP) {
             Text(
                 text = "Password doesn't match!",
                 color = Color.Red,
+                fontFamily = inter_font,
                 modifier = Modifier.padding(end = 100.dp)
             )
         }
@@ -241,6 +264,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             Text(
                 text = "Confirm Password please!",
                 color = Color.Red,
+                fontFamily = inter_font,
                 modifier = Modifier.padding(end = 100.dp)
             )
         }
@@ -249,8 +273,14 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             onValueChange = {
                 cpassword = it
             },
-            label = {
-                Text(text = "Confirm Password")
+            placeholder = {
+                Text(
+                    text = "Confirm",
+                    fontFamily = inter_font,
+                    color = Color.LightGray,
+                    fontWeight = FontWeight(500),
+                    fontSize = 26.sp
+                )
             },
             leadingIcon = {
                 Icon(
@@ -285,36 +315,37 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             ),
             singleLine = true,
             textStyle = TextStyle(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                color = Color.LightGray,
+                fontFamily = inter_font,
+                fontWeight = FontWeight(500),
+                fontSize = 26.sp
             ),
-            shape = RoundedCornerShape(50.dp),
             modifier = Modifier
-                .width(300.dp)
-                .height(50.dp),
+                .width(304.dp)
+                .height(62.dp),
             colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                cursorColor = Color.Red,
-                //containerColor = Color(0x30FFFFFF),
-                focusedLeadingIconColor = Color.White,
-                unfocusedLeadingIconColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White,
-                focusedTrailingIconColor = Color.White,
-                unfocusedTrailingIconColor = Color.White
+                unfocusedIndicatorColor = Color(0xFF202027),
+                focusedIndicatorColor = Color.LightGray,
+                cursorColor = Color.White,
+                focusedContainerColor = Color(0x30FFFFFF),
+                unfocusedContainerColor = Color(0xFF202027),
+                focusedLeadingIconColor = Color.LightGray,
+                unfocusedLeadingIconColor = Color.LightGray,
+                focusedLabelColor = Color.LightGray,
+                unfocusedLabelColor = Color.LightGray,
+                focusedTrailingIconColor = Color.LightGray,
+                unfocusedTrailingIconColor = Color.LightGray,
             )
         )
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         Box (
             modifier = Modifier
-                .clip(RoundedCornerShape(50.dp))
-                .background(
-                    color = Color.White,
-                )
+                .width(304.dp)
+                .height(57.dp)
+                .border(width = 2.dp, color = Color(0xFFFF003D)),
+            contentAlignment = Alignment.Center,
         ){
             Button(onClick = {
                 if (email.isNotEmpty()) {
@@ -345,16 +376,45 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
                 modifier = Modifier.width(200.dp)
             ) {
                 Text(
-                    text = "Sign UP",
-                    color = Color.Black,
+                    text = "Sign Up",
+                    color = Color(0xFFFF003D),
+                    fontFamily = inter_font,
                     fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight(500),
                 )
             }
             if (vm.signedIn.value) {
                 navController.navigate(DestinationScreen.Success.route)
             }
             vm.signedIn.value = false
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+        Row (
+            modifier = Modifier.padding(end = 170.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ){
+            Text(
+                text = "or",
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight(500),
+                fontFamily = inter_font,
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            ClickableText(
+                text = AnnotatedString("Login"),
+                style = TextStyle(
+                    color = Color(0xFFFF003D),
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight(500),
+                    fontFamily = inter_font,
+                ),
+                onClick = {
+                    navController.navigate(DestinationScreen.Login.route)
+                }
+            )
         }
     }
 }
