@@ -1,5 +1,6 @@
 package com.example.app3
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,12 +21,15 @@ import com.example.app3.auth.SignUpScreen
 import com.example.app3.auth.SuccessScreen
 import com.example.app3.main.NotificationMessage
 import com.example.app3.ui.theme.App3Theme
+import com.facebook.CallbackManager
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var callbackManager: CallbackManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        callbackManager = CallbackManager.Factory.create()
         setContent {
             window.statusBarColor = getColor(R.color.black)
             window.navigationBarColor = getColor(R.color.black)
@@ -35,10 +39,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AuthenticationApp()
+                    AuthenticationApp(callbackManager)
                 }
             }
         }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        callbackManager.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }
 
@@ -50,7 +58,7 @@ sealed class DestinationScreen(val route: String) {
 }
 
 @Composable
-fun AuthenticationApp() {
+fun AuthenticationApp(callbackManager: CallbackManager) {
     val vm = hiltViewModel<FbViewModel>()
     val navController =  rememberNavController()
 
@@ -64,7 +72,7 @@ fun AuthenticationApp() {
             SignUpScreen(navController, vm)
         }
         composable(DestinationScreen.Login.route) {
-            LoginScreen(navController, vm)
+            LoginScreen(navController, vm, callbackManager)
         }
         composable(DestinationScreen.Success.route) {
             SuccessScreen(navController, vm)

@@ -1,6 +1,8 @@
 package com.example.app3.auth
 
+import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -59,19 +61,24 @@ import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.inter_font
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun LoginScreen(navController: NavController, vm: FbViewModel) {
+fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: CallbackManager) {
     val emty by remember { mutableStateOf("") }
 
     var email by remember { mutableStateOf("") }
@@ -90,18 +97,8 @@ fun LoginScreen(navController: NavController, vm: FbViewModel) {
         }
     )
     val token = stringResource(R.string.web_id)
-    val context = LocalContext.current
+    val context = LocalContext.current as Activity
 
-    /*  Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Red),
-            verticalArrangement = Arrangement.Center
-        ) {
-            if (vm.inProgress.value)
-                CircularProgressIndicator()
-        }*/
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -367,9 +364,25 @@ fun LoginScreen(navController: NavController, vm: FbViewModel) {
                     contentDescription = null,
                 )
             }
-            /*Button(
+            Button(
                 onClick = {
                     LoginManager.getInstance().logInWithReadPermissions(context, listOf("email", "public_profile"))
+                    LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+                        override fun onSuccess(result: LoginResult) {
+                            Log.d("FacebookLogin", "Login was successful. User ID: ${result?.accessToken?.userId}")
+                            val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
+                            Firebase.auth.signInWithCredential(credential)
+                            if (user != null) {
+                                navController.navigate(DestinationScreen.Success.route)
+                            }
+                        }
+                        override fun onCancel() {
+                            Log.d("FacebookLogin", "Login was cancelled.")
+                        }
+                        override fun onError(error: FacebookException) {
+                            Log.e("FacebookLogin", "Login failed. Error: ${error?.message}")
+                        }
+                    })
                 },
                 modifier = Modifier
                     .size(50.dp)
@@ -385,7 +398,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel) {
                     modifier = Modifier
                         .clip(RoundedCornerShape(25.dp))
                 )
-            } */
+            }
         }
     }
 }

@@ -38,6 +38,8 @@ import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.inter_font
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 // TODO download and insert background video
 
@@ -52,6 +54,10 @@ val text = buildAnnotatedString {
 
 @Composable
 fun MainScreen(navController: NavController, vm: FbViewModel) {
+
+    // Initialize user
+    Firebase.auth.signOut()
+
     Column (
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
@@ -95,68 +101,4 @@ fun MainScreen(navController: NavController, vm: FbViewModel) {
             }
         )
     }
-
-    /*Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 100.dp)
-    ) {
-        Text(
-            text = "Welcome Berlusconi!",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize =  40.sp
-        )
-        Spacer(modifier = Modifier.height(80.dp))
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50.dp))
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(Color.Red, Color.White, Color.Red)
-                    )
-                )
-        ) {
-            Button(onClick = {
-                navController.navigate(DestinationScreen.SignUp.route)
-            },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                modifier = Modifier.width(300.dp)
-            ) {
-                Text(
-                    text = "Sign Up Bagai",
-                    color = Color.Black,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50.dp))
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(Color.Red, Color.White, Color.Red)
-                    )
-                )
-        ) {
-            Button(onClick = {
-                navController.navigate(DestinationScreen.Login.route)
-            },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                modifier = Modifier.width(300.dp)
-            ) {
-                Text(
-                    text = "Login Pota!",
-                    color = Color.Black,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }*/
 }
