@@ -80,4 +80,8 @@ dependencies {
 
     implementation ("com.facebook.android:facebook-login:latest.release")
 
+    implementation ("com.google.accompanist:accompanist-insets:0.23.1")
+    implementation ("com.google.android.exoplayer:exoplayer-core:2.19.1")
+    implementation ("com.google.android.exoplayer:exoplayer-ui:2.19.1")
+
 }
