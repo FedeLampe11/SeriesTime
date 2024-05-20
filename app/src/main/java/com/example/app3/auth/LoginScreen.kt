@@ -60,7 +60,9 @@ import androidx.navigation.NavController
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.R
+import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
+import com.example.app3.ui.theme.ourRed
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -101,6 +103,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
@@ -108,8 +111,6 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 rememberScrollState()
             )
     ) {
-        Spacer(modifier = Modifier.height(300.dp))
-
         Text(
             text = "Login",
             color = Color.White,
@@ -171,16 +172,16 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 .width(304.dp)
                 .height(62.dp),
             colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color(0xFF202027),
-                focusedIndicatorColor = Color.LightGray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
                 cursorColor = Color.White,
                 focusedContainerColor = Color(0x30FFFFFF),
-                unfocusedContainerColor = Color(0xFF202027),
+                unfocusedContainerColor = darkBlue,
                 focusedLeadingIconColor = Color.LightGray,
                 unfocusedLeadingIconColor = Color.LightGray,
                 focusedLabelColor = Color.LightGray,
                 unfocusedLabelColor = Color.LightGray,
-                focusedTrailingIconColor = Color.LightGray,
+                focusedTrailingIconColor = Color.Blue,
                 unfocusedTrailingIconColor = Color.LightGray,
             )
         )
@@ -251,11 +252,11 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 .width(304.dp)
                 .height(62.dp),
             colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color(0xFF202027),
-                focusedIndicatorColor = Color.LightGray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
                 cursorColor = Color.White,
                 focusedContainerColor = Color(0x30FFFFFF),
-                unfocusedContainerColor = Color(0xFF202027),
+                unfocusedContainerColor = darkBlue,
                 focusedLeadingIconColor = Color.LightGray,
                 unfocusedLeadingIconColor = Color.LightGray,
                 focusedLabelColor = Color.LightGray,
@@ -271,7 +272,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
             modifier = Modifier
                 .width(304.dp)
                 .height(57.dp)
-                .border(width = 2.dp, color = Color(0xFFFF003D)),
+                .border(width = 2.dp, color = ourRed),
             contentAlignment = Alignment.Center
         ){
             Button(onClick = {
@@ -294,7 +295,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
             ) {
                 Text(
                     text = "Continue",
-                    color = Color(0xFFFF003D),
+                    color = ourRed,
                     fontFamily = inter_font,
                     fontSize = 30.sp,
                     fontWeight = FontWeight(500),
@@ -323,7 +324,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
             ClickableText(
                 text = AnnotatedString("Sign Up"),
                 style = TextStyle(
-                    color = Color(0xFFFF003D),
+                    color = ourRed,
                     fontSize = 26.sp,
                     fontWeight = FontWeight(500),
                     fontFamily = inter_font,
@@ -400,6 +401,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 )
             }
         }
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 

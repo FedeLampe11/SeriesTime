@@ -34,6 +34,7 @@ import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.inter_font
+import com.example.app3.ui.theme.ourRed
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -41,7 +42,7 @@ val text = buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color.White)) {
         append("Never miss your ")
     }
-    withStyle(style = SpanStyle(color = Color(0xFFFF003D))) {
+    withStyle(style = SpanStyle(color = ourRed)) {
         append("stories")
     }
 }
