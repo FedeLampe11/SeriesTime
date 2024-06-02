@@ -181,7 +181,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 unfocusedLeadingIconColor = Color.LightGray,
                 focusedLabelColor = Color.LightGray,
                 unfocusedLabelColor = Color.LightGray,
-                focusedTrailingIconColor = Color.Blue,
+                focusedTrailingIconColor = Color.Transparent,
                 unfocusedTrailingIconColor = Color.LightGray,
             )
         )
@@ -302,7 +302,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 )
             }
             if (vm.signedIn.value) {
-                navController.navigate(DestinationScreen.Success.route)
+                navController.navigate(DestinationScreen.Home.route)
             }
             vm.signedIn.value = false
         }
@@ -349,7 +349,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                     val gsc = GoogleSignIn.getClient(context, gso)
                     launcher.launch(gsc.signInIntent)
                     if (user != null) {
-                        navController.navigate(DestinationScreen.Success.route)
+                        navController.navigate(DestinationScreen.Home.route)
                     }
                 },
                 modifier = Modifier
@@ -374,7 +374,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                             val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
                             Firebase.auth.signInWithCredential(credential)
                             if (user != null) {
-                                navController.navigate(DestinationScreen.Success.route)
+                                navController.navigate(DestinationScreen.Home.route)
                             }
                         }
                         override fun onCancel() {

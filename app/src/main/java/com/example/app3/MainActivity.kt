@@ -7,16 +7,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.app3.auth.LoginScreen
 import com.example.app3.auth.MainScreen
+import com.example.app3.auth.ProfileScreen
 import com.example.app3.auth.SignUpScreen
 import com.example.app3.auth.SuccessScreen
 import com.example.app3.main.NotificationMessage
@@ -54,7 +53,8 @@ sealed class DestinationScreen(val route: String) {
     object Main: DestinationScreen("main")
     object SignUp: DestinationScreen("signup")
     object Login: DestinationScreen("login")
-    object Success: DestinationScreen("success")
+    object Home: DestinationScreen("home")
+    object Profile: DestinationScreen("profile")
 }
 
 @Composable
@@ -74,8 +74,11 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
         composable(DestinationScreen.Login.route) {
             LoginScreen(navController, vm, callbackManager)
         }
-        composable(DestinationScreen.Success.route) {
+        composable(DestinationScreen.Home.route) {
             SuccessScreen(navController, vm)
+        }
+        composable(DestinationScreen.Profile.route) {
+            ProfileScreen(navController, vm)
         }
     }
 }
