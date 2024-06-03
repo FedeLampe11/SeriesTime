@@ -13,6 +13,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.app3.auth.DetailScreen
+import com.example.app3.auth.FavouriteScreen
 import com.example.app3.auth.LoginScreen
 import com.example.app3.auth.MainScreen
 import com.example.app3.auth.ProfileScreen
@@ -39,8 +41,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    RecipeApp(navController = navController)
-                    //AuthenticationApp(callbackManager)
+                    //RecipeApp(navController = navController)
+                    AuthenticationApp(callbackManager)
                 }
             }
         }
@@ -56,7 +58,12 @@ sealed class DestinationScreen(val route: String) {
     object SignUp: DestinationScreen("signup")
     object Login: DestinationScreen("login")
     object Home: DestinationScreen("home")
+    object Favourite: DestinationScreen("favourite")
     object Profile: DestinationScreen("profile")
+    // TODO: temporary
+    object Detail: DestinationScreen("detail/{seriesId}") {
+        fun createRoute(seriesId: Long) = "detail/$seriesId"
+    }
 }
 
 @Composable
@@ -66,7 +73,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
 
     NotificationMessage(vm)
 
-    NavHost(navController = navController, startDestination = DestinationScreen.Main.route) {
+    NavHost(navController = navController, startDestination = DestinationScreen.Home.route) {
         composable(DestinationScreen.Main.route) {
             MainScreen(navController, vm)
         }
@@ -79,8 +86,17 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
         composable(DestinationScreen.Home.route) {
             SuccessScreen(navController, vm)
         }
+        composable(DestinationScreen.Favourite.route) {
+            FavouriteScreen(navController, vm)
+        }
         composable(DestinationScreen.Profile.route) {
             ProfileScreen(navController, vm)
+        }
+        composable(DestinationScreen.Detail.route) { backStackEntry ->
+            val seriesId = backStackEntry.arguments?.getString("seriesId")?.toLong()
+            seriesId?.let {
+                DetailScreen(navController, vm, it)
+            }
         }
     }
 }

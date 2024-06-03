@@ -67,7 +67,6 @@ fun VideoBackground(uri: Uri) {
 
 @Composable
 fun MainScreen(navController: NavController, vm: FbViewModel) {
-
     // Initialize user
     Firebase.auth.signOut()
 

@@ -15,11 +15,14 @@ import kotlinx.parcelize.Parcelize
     "image_thumbnail_path": "https://static.episodate.com/images/tv-show/thumbnail/35624.jpg"
 */
 @Parcelize
-data class Category(
-    val total: String,
-    val page: Int,
-    val pages: Int,
-    val tv_shows: List<Series>
+data class Series(
+    val id: Long,
+    val name: String,
+    val permalink: String?,
+    val start_date: String?,
+    val end_date: String?,
+    val country: String?,
+    val network: String?,
+    val status: String?,
+    val image_thumbnail_path: String?
 ): Parcelable
-
-data class CategoriesResponse(val categories: Category)

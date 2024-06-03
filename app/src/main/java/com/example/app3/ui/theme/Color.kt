@@ -1,5 +1,6 @@
 package com.example.app3.ui.theme
 
+import androidx.compose.material3.SwitchColors
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -12,3 +13,22 @@ val Pink40 = Color(0xFF7D5260)
 
 val ourRed = Color(0xFFFF003D)
 val darkBlue = Color(0xFF202027)
+
+val switch_colors = SwitchColors(
+    checkedThumbColor = Color.White,
+    checkedTrackColor = ourRed,
+    checkedBorderColor = Color.Black,
+    checkedIconColor = Color.Black,
+    uncheckedThumbColor = ourRed,
+    uncheckedTrackColor = Color.White,
+    uncheckedBorderColor = Color.Black,
+    uncheckedIconColor = Color.Black,
+    disabledCheckedThumbColor = Color.Black,
+    disabledCheckedTrackColor = Color.Black,
+    disabledCheckedBorderColor = Color.Black,
+    disabledCheckedIconColor = Color.Black,
+    disabledUncheckedThumbColor = Color.Black,
+    disabledUncheckedTrackColor = Color.Black,
+    disabledUncheckedBorderColor = Color.Black,
+    disabledUncheckedIconColor = Color.Black,
+)

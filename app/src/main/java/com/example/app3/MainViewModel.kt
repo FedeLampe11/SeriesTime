@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
 class MainViewModel: ViewModel() {
@@ -34,7 +33,7 @@ class MainViewModel: ViewModel() {
     }
     data class RecipeState(
         val loading: Boolean = true,
-        val list: List<Movie> = emptyList(),
+        val list: List<Series> = emptyList(),
         val error: String? = null
     )
 

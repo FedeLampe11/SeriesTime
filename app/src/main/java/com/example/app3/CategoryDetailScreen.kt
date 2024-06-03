@@ -32,8 +32,11 @@ fun CategoryDetailScreen(category: Category){
                 .wrapContentSize()
                 .aspectRatio(1f)
         )*/
-        Text(text = "" + category.page, textAlign = TextAlign.Justify,
-            modifier = Modifier.verticalScroll(rememberScrollState()))
+        Text(
+            text = "" + category.page,
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        )
     }
 
 }
