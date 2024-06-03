@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         callbackManager = CallbackManager.Factory.create()
         setContent {
+            val navController  = rememberNavController()
             window.statusBarColor = getColor(R.color.black)
             window.navigationBarColor = getColor(R.color.black)
             App3Theme {
@@ -38,7 +39,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AuthenticationApp(callbackManager)
+                    RecipeApp(navController = navController)
+                    //AuthenticationApp(callbackManager)
                 }
             }
         }
