@@ -40,9 +40,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,6 +73,50 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.delay
+
+
+val top5List = listOf(series1, series2, series1, series2, series1)
+
+@Composable
+fun IndicatorDots(size: Int, currentIndex: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .padding(top = 150.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(size) { index ->
+            Box(
+                modifier = Modifier
+                    .size(if (index == currentIndex) 12.dp else 8.dp)
+                    .padding(2.dp)
+                    .clip(CircleShape)
+                    .background(if (index == currentIndex) ourRed else Color.White)
+            )
+        }
+    }
+}
+
+@Composable
+fun Carousel(images: List<Series>, navController: NavController) {
+    var currentIndex by remember { mutableStateOf(0) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(10000L) // Delay of 10 seconds
+            currentIndex = (currentIndex + 1) % images.size
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        SeriesItem(top5List.get(currentIndex), showName = false, navController)
+        IndicatorDots(size = top5List.size, currentIndex = currentIndex)
+    }
+}
 
 @Composable
 fun SeriesItem(series: Series, showName: Boolean, navController: NavController) {
@@ -117,7 +164,7 @@ fun SeriesScreen(seriesList: List<Series>, innerPadding: PaddingValues, navContr
         //SearchBox()
         Spacer(modifier = Modifier.height(15.dp))
 
-        //HorizontalPager() Carousel
+        Carousel(top5List, navController)
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
@@ -181,24 +228,6 @@ fun SeriesScreen(seriesList: List<Series>, innerPadding: PaddingValues, navContr
 
 @Composable
 fun ScrollMainPage(navController: NavController, innerPadding: PaddingValues) {
-    /*Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .verticalScroll(rememberScrollState())
-            .background(Color.Black)
-    ) {
-        Text(text = "Ciao", color = Color.White)
-        repeat(40) {
-            Text(text = email, color = Color.White)
-        }
-        Text(text = "ACM", color = Color.White)
-        repeat(40) {
-            Text(text = email, color = Color.White)
-        }
-        Text(text = "AC MILAN", color = Color.White)
-    }*/
     /*val recipeViewModel: MainViewModel = viewModel()
     val viewstate by recipeViewModel.categoriesState
     Box(modifier = Modifier.fillMaxSize()){
