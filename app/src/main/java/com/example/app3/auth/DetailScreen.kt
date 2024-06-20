@@ -44,8 +44,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
+import com.example.app3.Movie
 import com.example.app3.R
-import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
@@ -53,7 +53,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @Composable
-fun ScrollDetailPage(innerPadding: PaddingValues, series: Series) {
+fun ScrollDetailPage(innerPadding: PaddingValues, series: Movie) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()

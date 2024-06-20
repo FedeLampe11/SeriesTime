@@ -1,6 +1,5 @@
 package com.example.app3.auth
 
-import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,12 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -44,13 +40,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -66,6 +62,7 @@ import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
+import com.example.app3.Movie
 import com.example.app3.R
 import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
@@ -101,9 +98,9 @@ fun IndicatorDots(size: Int, currentIndex: Int) {
 }
 
 @Composable
-fun Carousel(images: List<Series>, navController: NavController) {
+fun Carousel(images: List<Movie>, navController: NavController) {
     var currentIndex by remember { mutableStateOf(0) }
-    val coroutineScope = rememberCoroutineScope()
+    // val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -113,19 +110,19 @@ fun Carousel(images: List<Series>, navController: NavController) {
     }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        SeriesItem(top5List.get(currentIndex), showName = false, navController)
-        IndicatorDots(size = top5List.size, currentIndex = currentIndex)
+        SeriesItem(images[currentIndex], showName = false, navController)
+        IndicatorDots(size = images.size, currentIndex = currentIndex)
     }
 }
 
 @Composable
-fun SeriesItem(series: Series, showName: Boolean, navController: NavController) {
+fun SeriesItem(series: Movie, showName: Boolean, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .width(110.dp)
             .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
+                navController.navigate(DestinationScreen.Detail.createRoute(series.id.toLong()))
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -140,7 +137,7 @@ fun SeriesItem(series: Series, showName: Boolean, navController: NavController) 
         )
         if (showName) {
             Text(
-                text = series.name,
+                text = series.name + "",
                 color = Color.White,
                 fontFamily = inter_font,
                 fontSize = 20.sp,
@@ -152,7 +149,40 @@ fun SeriesItem(series: Series, showName: Boolean, navController: NavController) 
 }
 
 @Composable
-fun SeriesScreen(seriesList: List<Series>, innerPadding: PaddingValues, navController: NavController){
+fun SeriesItem2(series: Series, showName: Boolean, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .width(110.dp)
+            .clickable {
+                navController.navigate(DestinationScreen.Detail.createRoute(series.id.toLong()))
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(series.image_thumbnail_path),
+            //painter = painterResource(id = R.drawable.facebook),
+            contentDescription = "Series Thumbnail",
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(bottom = 4.dp)
+        )
+        if (showName) {
+            Text(
+                text = series.name + "",
+                color = Color.White,
+                fontFamily = inter_font,
+                fontSize = 20.sp,
+                style = TextStyle(fontWeight = FontWeight.Normal),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun SeriesScreen(seriesList: List<Movie>, innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState){
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -202,15 +232,33 @@ fun SeriesScreen(seriesList: List<Series>, innerPadding: PaddingValues, navContr
                 .padding(vertical = 15.dp)
         )
 
-        LazyHorizontalGrid(
-            GridCells.Fixed(1),
-            modifier = Modifier
-                .height(150.dp)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(favouriteList){ series ->
-                SeriesItem(series, showName = true, navController)
+            when {
+                viewState.loading -> {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
+
+                viewState.error != null -> {
+                    //Text(text = "Error occurred!")
+                    Text(text = "${viewState.error}")
+                }
+
+                else -> {
+                    LazyHorizontalGrid(
+                        GridCells.Fixed(1),
+                        modifier = Modifier
+                            .height(150.dp)
+                    ) {
+                        items(viewState.obj.tv_shows){ series ->
+                            SeriesItem2(series, showName = true, navController)
+                        }
+                    }
+                }
             }
         }
+
         Spacer(modifier = Modifier.height(15.dp))
 
         /*LazyVerticalGrid(
@@ -227,30 +275,8 @@ fun SeriesScreen(seriesList: List<Series>, innerPadding: PaddingValues, navContr
 }
 
 @Composable
-fun ScrollMainPage(navController: NavController, innerPadding: PaddingValues) {
-    /*val recipeViewModel: MainViewModel = viewModel()
-    val viewstate by recipeViewModel.categoriesState
-    Box(modifier = Modifier.fillMaxSize()){
-        when{
-            viewstate.loading ->{
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(innerPadding)
-                )
-            }
-            viewstate.error != null ->{
-                Text(
-                    text = "ERROR OCCURRED: " + viewstate.error.toString(),
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
-            else ->{
-                SeriesScreen(viewstate.list, innerPadding, navController)
-            }
-        }
-    }*/
-    SeriesScreen(favouriteList, innerPadding, navController)
+fun ScrollMainPage(navController: NavController, innerPadding: PaddingValues, viewState: MainViewModel.ReplyState) {
+    SeriesScreen(favouriteList, innerPadding, navController, viewState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -260,6 +286,9 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val photoUrl = user?.photoUrl
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
+    val apiViewModel: MainViewModel = viewModel()
+    val viewstate by apiViewModel.seriesState
 
     Scaffold (
         modifier = Modifier
@@ -363,6 +392,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-        innerPadding -> ScrollMainPage(navController, innerPadding)
+        innerPadding -> ScrollMainPage(navController, innerPadding, viewstate)
     }
 }

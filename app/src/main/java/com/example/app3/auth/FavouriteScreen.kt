@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
+import com.example.app3.Movie
 import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
@@ -56,8 +57,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 // Mocked series
-val series1 = Series(1, "Face", "", "", "", "", "", "", "",)
-val series2 = Series(2, "Book", "", "", "", "", "", "", "",)
+val series1 = Movie(1, "Face", "", "", "", "", "", "", "",)
+val series2 = Movie(2, "Book", "", "", "", "", "", "", "",)
 // TODO: metti le serie vere nei preferiti
 val favouriteList = mutableListOf(series1, series2, series1, series2, series1, series2, series1, series2, series1, series2, series1, series2, series1, series2)
     //.sortedBy { it.name } COMMAND TO SORT THE SERIES
