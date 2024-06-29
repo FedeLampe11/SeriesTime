@@ -3,6 +3,7 @@ package com.example.app3.auth
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,15 +11,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +31,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -45,6 +51,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,6 +69,8 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.switch_colors
 import com.google.firebase.Firebase
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 @Composable
@@ -115,7 +127,8 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp, vertical = 12.dp),
+                .padding(horizontal = 40.dp, vertical = 12.dp)
+                .padding(top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ){
@@ -132,27 +145,26 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
             )
         }
 
-        for (i in 1..3) {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 40.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-                Text(
-                    text = "Setting ${i+1}",
-                    fontFamily = inter_font,
-                    color = Color.White,
-                    maxLines = 2,
-                )
-                Switch(
-                    checked = enabled[i],
-                    onCheckedChange = { enabled[i] = it },
-                    colors = switch_colors
-                )
-            }
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Text(
+                text = "Hide already seen episodes",
+                fontFamily = inter_font,
+                color = Color.White,
+                maxLines = 2,
+            )
+            Switch(
+                checked = enabled[1],
+                onCheckedChange = { enabled[1] = it },
+                colors = switch_colors
+            )
         }
+
         Button(
             onClick = {
                 Firebase.auth.signOut()
@@ -187,8 +199,6 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
 fun ProfileScreen(navController: NavController, vm: FbViewModel) {
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val name = user?.displayName.toString()
-    val mail = user?.email.toString()
-    var newName by remember { mutableStateOf("") }
     val photoUrl = user?.photoUrl
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -213,12 +223,13 @@ fun ProfileScreen(navController: NavController, vm: FbViewModel) {
                         fontWeight = FontWeight(700),
                         color = Color.White,
                     ),
-                    modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                    modifier = Modifier
+                        .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                        .clickable { navController.navigate(DestinationScreen.Home.route) }
                 )
                 IconButton(
                     onClick = {
-                        navController.navigate(DestinationScreen.Profile.route)
-                        //navController.navigate(DestinationScreen.Notifications.route)
+                        navController.navigate(DestinationScreen.Notification.route)
                     }
                 ) {
                     Icon(
@@ -241,14 +252,14 @@ fun ProfileScreen(navController: NavController, vm: FbViewModel) {
                 ){
                 IconButton(
                     onClick = {
-                        navController.navigate(DestinationScreen.Home.route)
+                        navController.navigate(DestinationScreen.Search.route)
                     }
                 ) {
                     Icon(
                         modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Home,
+                        imageVector = Icons.Filled.Search,
                         tint = ourRed,
-                        contentDescription = "Go to homepage"
+                        contentDescription = "Go to search page"
                     )
                 }
 

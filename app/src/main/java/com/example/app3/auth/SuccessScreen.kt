@@ -1,8 +1,11 @@
 package com.example.app3.auth
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,34 +13,45 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,11 +60,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,16 +77,15 @@ import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
-import com.example.app3.Movie
 import com.example.app3.R
 import com.example.app3.Series
+import com.example.app3.seriesService
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
-
 
 val top5List = listOf(series1, series2, series1, series2, series1)
 
@@ -80,8 +94,7 @@ fun IndicatorDots(size: Int, currentIndex: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .padding(top = 150.dp),
+            .padding(top = 400.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -97,32 +110,66 @@ fun IndicatorDots(size: Int, currentIndex: Int) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Carousel(images: List<Movie>, navController: NavController) {
-    var currentIndex by remember { mutableStateOf(0) }
-    // val coroutineScope = rememberCoroutineScope()
+fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) {
+    val numberOfSeries = 5;
+    val pagerState = rememberPagerState(pageCount = { numberOfSeries })
+    val topSeries = viewState.obj.tv_shows.take(numberOfSeries)
 
     LaunchedEffect(Unit) {
         while (true) {
             delay(10000L) // Delay of 10 seconds
-            currentIndex = (currentIndex + 1) % images.size
+            pagerState.animateScrollToPage((pagerState.currentPage + 1) % numberOfSeries)
         }
     }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            viewState.loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(top = 15.dp),
+                    color = ourRed,
+                )
+            }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        SeriesItem(images[currentIndex], showName = false, navController)
-        IndicatorDots(size = images.size, currentIndex = currentIndex)
+            viewState.error != null -> {
+                //Text(text = "Error occurred!")
+                Text(text = "${viewState.error}")
+            }
+
+            else -> {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                ) { page ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CarouselItem(topSeries[page], navController)
+                    }
+                }
+                IndicatorDots(size = numberOfSeries, currentIndex = pagerState.currentPage)
+            }
+        }
     }
 }
 
 @Composable
-fun SeriesItem(series: Movie, showName: Boolean, navController: NavController) {
+fun SeriesItem(series: Series, showName: Boolean, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .width(110.dp)
             .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(series.id.toLong()))
+                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -153,15 +200,14 @@ fun SeriesItem2(series: Series, showName: Boolean, navController: NavController)
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .width(110.dp)
+            .width(150.dp)
             .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(series.id.toLong()))
+                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
             painter = rememberAsyncImagePainter(series.image_thumbnail_path),
-            //painter = painterResource(id = R.drawable.facebook),
             contentDescription = "Series Thumbnail",
             modifier = Modifier
                 .fillMaxWidth()
@@ -175,14 +221,37 @@ fun SeriesItem2(series: Series, showName: Boolean, navController: NavController)
                 fontFamily = inter_font,
                 fontSize = 20.sp,
                 style = TextStyle(fontWeight = FontWeight.Normal),
-                modifier = Modifier.padding(top = 4.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 6.dp)
             )
         }
     }
 }
 
 @Composable
-fun SeriesScreen(seriesList: List<Movie>, innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState){
+fun CarouselItem(series: Series, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxHeight()
+            .clickable {
+                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(series.image_thumbnail_path),
+            contentDescription = "Series Thumbnail",
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(bottom = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState){
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -190,11 +259,9 @@ fun SeriesScreen(seriesList: List<Movie>, innerPadding: PaddingValues, navContro
             .background(Color.Black)
             .padding(innerPadding)
     ){
-        //TODO: add searchBox
-        //SearchBox()
         Spacer(modifier = Modifier.height(15.dp))
 
-        Carousel(top5List, navController)
+        Carousel(navController, viewState)
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
@@ -237,7 +304,12 @@ fun SeriesScreen(seriesList: List<Movie>, innerPadding: PaddingValues, navContro
         ) {
             when {
                 viewState.loading -> {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = 15.dp),
+                        color = ourRed,
+                    )
                 }
 
                 viewState.error != null -> {
@@ -249,7 +321,7 @@ fun SeriesScreen(seriesList: List<Movie>, innerPadding: PaddingValues, navContro
                     LazyHorizontalGrid(
                         GridCells.Fixed(1),
                         modifier = Modifier
-                            .height(150.dp)
+                            .height(250.dp)
                     ) {
                         items(viewState.obj.tv_shows){ series ->
                             SeriesItem2(series, showName = true, navController)
@@ -258,25 +330,8 @@ fun SeriesScreen(seriesList: List<Movie>, innerPadding: PaddingValues, navContro
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(15.dp))
-
-        /*LazyVerticalGrid(
-            GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ){
-            items(seriesList){
-                    series -> SeriesItem(series, showName = false, navController)
-            }
-        }*/
     }
-}
-
-@Composable
-fun ScrollMainPage(navController: NavController, innerPadding: PaddingValues, viewState: MainViewModel.ReplyState) {
-    SeriesScreen(favouriteList, innerPadding, navController, viewState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -312,11 +367,11 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
                          color = Color.White,
                      ),
                      modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                         .clickable { navController.navigate(DestinationScreen.Home.route) }
                  )
                  IconButton(
                      onClick = {
-                         navController.navigate(DestinationScreen.Profile.route)
-                         //navController.navigate(DestinationScreen.Notifications.route)
+                         navController.navigate(DestinationScreen.Notification.route)
                      }
                  ) {
                      Icon(
@@ -339,14 +394,14 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
             ){
                 IconButton(
                     onClick = {
-                        navController.navigate(DestinationScreen.Home.route)
+                        navController.navigate(DestinationScreen.Search.route)
                     }
                 ) {
                     Icon(
                         modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Home,
+                        imageVector = Icons.Filled.Search,
                         tint = ourRed,
-                        contentDescription = "Go to homepage"
+                        contentDescription = "Go to search page"
                     )
                 }
 
@@ -392,6 +447,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-        innerPadding -> ScrollMainPage(navController, innerPadding, viewstate)
+        innerPadding -> SeriesScreen(innerPadding, navController, viewstate)
     }
 }

@@ -2,22 +2,35 @@ package com.example.app3.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,70 +45,134 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
+import com.example.app3.Details
+import com.example.app3.Episode
 import com.example.app3.FbViewModel
-import com.example.app3.Movie
+import com.example.app3.MainViewModel
 import com.example.app3.R
+import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+// TODO: pensa se spostare il cuore in alto o meno
+
 @Composable
-fun ScrollDetailPage(innerPadding: PaddingValues, series: Movie) {
+fun EpisodeRow(episode: Episode) {
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 30.dp)
+            .border(width = 2.dp, shape = RectangleShape, color = darkBlue),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Text(
+            text = "Season: ${episode.season} Ep: ${episode.episode}",
+            fontSize = 16.sp,
+            fontFamily = inter_font,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(6.dp)
+        )
+        // TODO: metti segnale se episodio già visto
+        if (false) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = "Episode already seen",
+                tint = ourRed,
+                modifier = Modifier.clickable {
+                    // TODO: remove from seen list
+                }
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Outlined.Add,
+                contentDescription = "Episode not already seen",
+                tint = ourRed,
+                modifier = Modifier.clickable {
+                    // TODO: add in seen list
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ScrollDetailPage(obj: Details) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .padding(innerPadding),
-        
-    ){
-        item {
-            Row (
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ){
-                // TODO: prendi immagine dalla serie
-                Image(
-                    painter = painterResource(id = R.drawable.google),
-                    contentDescription = "Series Thumbnail",
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(horizontal = 100.dp)
-                        .padding(top = 20.dp, bottom = 30.dp),
-                )
-            }
-
-        }
-        item {
-            Row (
+    ) {
+        item { // Static part
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 50.dp),
+                    .height(400.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(obj.image_thumbnail_path),
+                    contentDescription = "Series Thumbnail",
+                    contentScale = ContentScale.FillHeight,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 30.dp, horizontal = 10.dp)
+                        .clipToBounds(),
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = series.name,
+                    text = obj.name + "",
                     fontSize = 30.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     maxLines = 2
                 )
+            }
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp)
+                    .padding(top = 30.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Rating: " + obj.rating + "",
+                    fontSize = 18.sp,
+                    fontFamily = inter_font,
+                    fontWeight = FontWeight.Bold,
+                    color = ourRed,
+                )
                 // TODO: mettere controllo  se serie è nei preferiti
                 if (true) {
                     Icon(
@@ -116,24 +193,57 @@ fun ScrollDetailPage(innerPadding: PaddingValues, series: Movie) {
                         modifier = Modifier
                             .size(40.dp)
                             .clickable {
-                            // TODO: metti nei preferiti
-                        }
+                                // TODO: metti nei preferiti
+                            }
                     )
                 }
             }
-        }
-        // TODO: metti gli episodi della serie
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(30.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = obj.description + "",
+                    fontSize = 20.sp,
+                    fontFamily = inter_font,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Justify
+                )
+            }
+        }
+        if (!obj.episodes.isNullOrEmpty()) {
+            item{
+                Text(
+                    text = "Episodes",
+                    fontSize = 20.sp,
+                    fontFamily = inter_font,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 30.dp)
+                        .padding(bottom = 20.dp)
+                )
+            }
+            items(obj.episodes) {
+                episode -> EpisodeRow(episode)
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: Long) {
+fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String) {
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val photoUrl = user?.photoUrl
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    val series = favouriteList.find { it.id == seriesId }
+
+    val apiViewModel: MainViewModel = viewModel()
+    apiViewModel.fetchDetailPage(seriesId)
+    val viewstate by apiViewModel.detailState
 
     Scaffold (
         modifier = Modifier
@@ -171,14 +281,14 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: Long) 
                 ){
                 IconButton(
                     onClick = {
-                        navController.navigate(DestinationScreen.Home.route)
+                        navController.navigate(DestinationScreen.Search.route)
                     }
                 ) {
                     Icon(
                         modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Home,
+                        imageVector = Icons.Filled.Search,
                         tint = ourRed,
-                        contentDescription = "Go to homepage"
+                        contentDescription = "Go to search page"
                     )
                 }
 
@@ -225,17 +335,31 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: Long) 
         }
     ) {
         innerPadding ->
-        if (series != null) {
-            ScrollDetailPage(innerPadding, series)
-        } else {
-            Text(
-                text = "Series not found",
-                modifier = Modifier.padding(innerPadding),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = inter_font,
-                color = Color.Red
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            when {
+                viewstate.loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = 15.dp),
+                        color = ourRed,
+                    )
+                }
+
+                viewstate.error != null -> {
+                    //Text(text = "Error occurred!")
+                    Text(text = "${viewstate.error}" + "",
+                        color = Color.White)
+                }
+
+                else -> {
+                    ScrollDetailPage(viewstate.obj)
+                }
+            }
         }
     }
 }

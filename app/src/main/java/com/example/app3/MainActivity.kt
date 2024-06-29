@@ -17,7 +17,9 @@ import com.example.app3.auth.DetailScreen
 import com.example.app3.auth.FavouriteScreen
 import com.example.app3.auth.LoginScreen
 import com.example.app3.auth.MainScreen
+import com.example.app3.auth.NotificationScreen
 import com.example.app3.auth.ProfileScreen
+import com.example.app3.auth.SearchScreen
 import com.example.app3.auth.SignUpScreen
 import com.example.app3.auth.SuccessScreen
 import com.example.app3.main.NotificationMessage
@@ -32,7 +34,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         callbackManager = CallbackManager.Factory.create()
         setContent {
-            val navController  = rememberNavController()
             window.statusBarColor = getColor(R.color.black)
             window.navigationBarColor = getColor(R.color.black)
             App3Theme {
@@ -41,7 +42,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    //RecipeApp(navController = navController)
                     AuthenticationApp(callbackManager)
                 }
             }
@@ -60,10 +60,11 @@ sealed class DestinationScreen(val route: String) {
     object Home: DestinationScreen("home")
     object Favourite: DestinationScreen("favourite")
     object Profile: DestinationScreen("profile")
-    // TODO: temporary
     object Detail: DestinationScreen("detail/{seriesId}") {
-        fun createRoute(seriesId: Long) = "detail/$seriesId"
+        fun createRoute(seriesId: String) = "detail/$seriesId"
     }
+    object Search: DestinationScreen("search")
+    object Notification: DestinationScreen("notification")
 }
 
 @Composable
@@ -93,10 +94,16 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             ProfileScreen(navController, vm)
         }
         composable(DestinationScreen.Detail.route) { backStackEntry ->
-            val seriesId = backStackEntry.arguments?.getString("seriesId")?.toLong()
+            val seriesId = backStackEntry.arguments?.getString("seriesId")
             seriesId?.let {
                 DetailScreen(navController, vm, it)
             }
+        }
+        composable(DestinationScreen.Search.route) {
+            SearchScreen(navController, vm)
+        }
+        composable(DestinationScreen.Notification.route) {
+            NotificationScreen(navController, vm)
         }
     }
 }
