@@ -61,3 +61,14 @@ data class Details(
 data class EpReply(
     val tvShow: Details
 ): Parcelable
+
+@Parcelize
+data class UserAuthReply(
+    val id: Long,
+    val full_name: String,
+    val email: String,
+    val password: String?,
+    val meta_api_key: String?,
+    val google_api_key: String?,
+    val profile_picture: String?
+): Parcelable

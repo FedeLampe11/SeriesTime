@@ -52,11 +52,13 @@ import com.example.app3.ui.theme.ourRed
 @Composable
 fun SignUpScreen(navController: NavController, vm: FbViewModel) {
     val emty by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var cpassword by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
     var cpasswordVisibility by remember { mutableStateOf(false) }
+    var errorN by remember { mutableStateOf(false) }
     var errorE by remember { mutableStateOf(false) }
     var errorP by remember { mutableStateOf(false) }
     var errorCP by remember { mutableStateOf(false) }
@@ -83,6 +85,73 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
         )
 
         Spacer(modifier = Modifier.height(30.dp))
+
+        if (errorN) {
+            Text(
+                text = "Enter Name",
+                color = Color.Red,
+                fontFamily = inter_font,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        TextField(
+            value = name,
+            onValueChange = {
+                name = it
+            },
+            placeholder = {
+                Text(
+                    text = "Name",
+                    fontFamily = inter_font,
+                    color = Color.LightGray,
+                    fontWeight = FontWeight(500),
+                    fontSize = 26.sp
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_person_24),
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {
+                if (email.isNotEmpty())
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_close_24),
+                        contentDescription = null,
+                        Modifier.clickable { name = emty }
+                    )
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+            ),
+            singleLine = true,
+            textStyle = TextStyle(
+                color = Color.LightGray,
+                fontFamily = inter_font,
+                fontWeight = FontWeight(500),
+                fontSize = 26.sp
+            ),
+            modifier = Modifier
+                .width(304.dp)
+                .height(62.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedIndicatorColor = darkBlue,
+                focusedIndicatorColor = Color.LightGray,
+                cursorColor = Color.White,
+                focusedContainerColor = Color(0x30FFFFFF),
+                unfocusedContainerColor = darkBlue,
+                focusedLeadingIconColor = Color.LightGray,
+                unfocusedLeadingIconColor = Color.LightGray,
+                focusedLabelColor = Color.LightGray,
+                unfocusedLabelColor = Color.LightGray,
+                focusedTrailingIconColor = Color.LightGray,
+                unfocusedTrailingIconColor = Color.LightGray,
+            )
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (errorE) {
             Text(
@@ -332,26 +401,31 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
             contentAlignment = Alignment.Center,
         ){
             Button(onClick = {
-                if (email.isNotEmpty()) {
-                    errorE = false
-                    if (password.isNotEmpty()) {
-                        errorP = false
-                        if (cpassword.isNotEmpty()) {
-                            errorC = false
-                            if (password == cpassword) {
-                                errorCP = false
-                                vm.onSignUp(email, password)
+                if (name.isNotEmpty()) {
+                    errorN = false
+                    if (email.isNotEmpty()) {
+                        errorE = false
+                        if (password.isNotEmpty()) {
+                            errorP = false
+                            if (cpassword.isNotEmpty()) {
+                                errorC = false
+                                if (password == cpassword) {
+                                    errorCP = false
+                                    vm.onSignUp(name, email, password)
+                                } else {
+                                    errorCP = true
+                                }
                             } else {
-                                errorCP = true
+                                errorC = true
                             }
                         } else {
-                            errorC = true
+                            errorP = true
                         }
                     } else {
-                        errorP = true
+                        errorE = true
                     }
                 } else {
-                    errorE = true
+                    errorN = true
                 }
             },
                 colors = ButtonDefaults.buttonColors(

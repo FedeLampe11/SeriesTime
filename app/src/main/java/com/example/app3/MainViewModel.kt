@@ -42,9 +42,7 @@ class MainViewModel: ViewModel() {
     fun fetchDetailPage(id: String) {
         viewModelScope.launch {
             try {
-                Log.d("API", "Fetching details for id: $id")
                 val resp = seriesService.getDetailPage(id)
-                Log.d("API", "Received response: $resp")
                 _detailState.value = _detailState.value.copy(
                     obj = resp.tvShow,
                     loading = false,
