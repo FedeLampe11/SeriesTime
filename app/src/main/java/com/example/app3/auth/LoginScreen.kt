@@ -63,6 +63,7 @@ import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import com.example.app3.userService
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -349,6 +350,18 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                     val gsc = GoogleSignIn.getClient(context, gso)
                     launcher.launch(gsc.signInIntent)
                     if (user != null) {
+                        val body = mapOf(
+                            "id" to null,
+                            "full_name" to user!!.displayName.toString(),
+                            "email" to user!!.email,
+                            "password" to null,
+                            "meta_api_key" to null,
+                            "google_api_key" to user!!.uid,
+                            "profile_picture" to user!!.photoUrl.toString()
+                        )
+                        if (true) { // Not in table
+                            vm.addNewUser(body)
+                        }
                         navController.navigate(DestinationScreen.Home.route)
                     }
                 },
@@ -370,10 +383,24 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                     LoginManager.getInstance().logInWithReadPermissions(context, listOf("email", "public_profile"))
                     LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
                         override fun onSuccess(result: LoginResult) {
-                            Log.d("FacebookLogin", "Login was successful. User ID: ${result?.accessToken?.userId}")
+                            Log.d("FacebookLogin", "Login was successful. User ID: ${result.accessToken.userId}")
                             val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
                             Firebase.auth.signInWithCredential(credential)
+
+                            Log.d("FacebookLogin", "User: $result")
                             if (user != null) {
+                                val body = mapOf(
+                                    "id" to null,
+                                    "full_name" to user!!.displayName.toString(),
+                                    "email" to user!!.email.toString(),
+                                    "password" to null,
+                                    "meta_api_key" to user!!.uid,
+                                    "google_api_key" to null,
+                                    "profile_picture" to user!!.photoUrl.toString()
+                                )
+                                if (true) { // Not in table
+                                    vm.addNewUser(body)
+                                }
                                 navController.navigate(DestinationScreen.Home.route)
                             }
                         }
@@ -381,7 +408,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                             Log.d("FacebookLogin", "Login was cancelled.")
                         }
                         override fun onError(error: FacebookException) {
-                            Log.e("FacebookLogin", "Login failed. Error: ${error?.message}")
+                            Log.e("FacebookLogin", "Login failed. Error: ${error.message}")
                         }
                     })
                 },

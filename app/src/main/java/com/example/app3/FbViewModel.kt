@@ -23,11 +23,11 @@ class FbViewModel @Inject constructor(
     private val _userState = mutableStateOf(UserReplyState())
     val userState: State<UserReplyState> = _userState
 
-    private fun addNewUser(body: Map<String, String?>){
+    fun addNewUser(body: Map<String, String?>){
         viewModelScope.launch{
             try{
                 val response = userService.postNewUser(body)
-                Log.d("DEBUG_server", "SONO QUI CAXXO")
+                Log.d("DEBUG_server", "Tutto OK, id: ${response.id}")
                 _userState.value = _userState.value.copy(
                     obj = response,
                     loading = false,
@@ -57,7 +57,6 @@ class FbViewModel @Inject constructor(
         inProgress.value = true
 
         addNewUser(body)
-        Log.d("DEBUG_server", "2: $body")
 
         /*auth.createUserWithEmailAndPassword(email, pass)
             .addOnCompleteListener {
