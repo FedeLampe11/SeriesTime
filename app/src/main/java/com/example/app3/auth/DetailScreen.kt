@@ -173,8 +173,8 @@ fun ScrollDetailPage(obj: Details) {
                     fontWeight = FontWeight.Bold,
                     color = ourRed,
                 )
-                // TODO: mettere controllo  se serie è nei preferiti
-                if (true) {
+                // TODO: mettere controllo se serie è nei preferiti
+                if (false) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
                         contentDescription = "Favorite button",

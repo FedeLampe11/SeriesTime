@@ -16,4 +16,10 @@ interface APIUser {
     @POST("v1/users")
     suspend fun postNewUser(@Body body: Map<String, String?>): UserAuthReply
 
+    @GET("v1/users")
+    suspend fun loginUser(@Query ("email") email: String, @Query("password") password: String): UserAuthReply
+
+    @GET("v1/favorites")
+    suspend fun getFavourite(@Query ("user_id") userId: Long): List<Long>
+
 }

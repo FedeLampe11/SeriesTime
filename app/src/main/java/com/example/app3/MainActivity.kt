@@ -74,7 +74,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
 
     NotificationMessage(vm)
 
-    NavHost(navController = navController, startDestination = DestinationScreen.Main.route) {
+    NavHost(navController = navController, startDestination = DestinationScreen.Home.route) {
         composable(DestinationScreen.Main.route) {
             MainScreen(navController, vm)
         }

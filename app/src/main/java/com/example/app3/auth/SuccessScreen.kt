@@ -87,8 +87,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
 
-val top5List = listOf(series1, series2, series1, series2, series1)
-
 @Composable
 fun IndicatorDots(size: Int, currentIndex: Int) {
     Row(
@@ -229,6 +227,39 @@ fun SeriesItem2(series: Series, showName: Boolean, navController: NavController)
 }
 
 @Composable
+fun SeriesItem3(seriesId: Long, showName: Boolean, navController: NavController, viewModel: MainViewModel.DetailState) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .width(150.dp)
+            .clickable {
+                navController.navigate(DestinationScreen.Detail.createRoute(seriesId.toString()))
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(viewModel.obj.image_thumbnail_path),
+            contentDescription = "Series Thumbnail",
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(bottom = 4.dp)
+        )
+        if (showName) {
+            Text(
+                text = viewModel.obj.name + "",
+                color = Color.White,
+                fontFamily = inter_font,
+                fontSize = 20.sp,
+                style = TextStyle(fontWeight = FontWeight.Normal),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+    }
+}
+
+@Composable
 fun CarouselItem(series: Series, navController: NavController) {
     Column(
         modifier = Modifier
@@ -251,7 +282,7 @@ fun CarouselItem(series: Series, navController: NavController) {
 }
 
 @Composable
-fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState){
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState, viewState2: MainViewModel.DetailState, vm: FbViewModel){
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -281,8 +312,8 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
             modifier = Modifier
                 .height(150.dp)
         ) {
-            items(favouriteList){ series ->
-                SeriesItem(series, showName = true, navController)
+            items(vm.favoriteState.value.obj){
+                series -> SeriesItem3(series, showName = true, navController, viewState2)
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -344,6 +375,7 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
 
     val apiViewModel: MainViewModel = viewModel()
     val viewstate by apiViewModel.seriesState
+    val viewState2 by apiViewModel.detailState
 
     Scaffold (
         modifier = Modifier
@@ -447,6 +479,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, viewstate)
+        innerPadding -> SeriesScreen(innerPadding, navController, viewstate, viewState2, vm)
     }
 }

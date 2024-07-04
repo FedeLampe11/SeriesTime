@@ -91,6 +91,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
     var errorP by remember { mutableStateOf(false) }
 
     var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+
     val launcher = authLauncher(
         onAuthComplete = {
             result -> user = result.user
@@ -350,18 +351,6 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                     val gsc = GoogleSignIn.getClient(context, gso)
                     launcher.launch(gsc.signInIntent)
                     if (user != null) {
-                        val body = mapOf(
-                            "id" to null,
-                            "full_name" to user!!.displayName.toString(),
-                            "email" to user!!.email,
-                            "password" to null,
-                            "meta_api_key" to null,
-                            "google_api_key" to user!!.uid,
-                            "profile_picture" to user!!.photoUrl.toString()
-                        )
-                        if (true) { // Not in table
-                            vm.addNewUser(body)
-                        }
                         navController.navigate(DestinationScreen.Home.route)
                     }
                 },
@@ -389,18 +378,6 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
 
                             Log.d("FacebookLogin", "User: $result")
                             if (user != null) {
-                                val body = mapOf(
-                                    "id" to null,
-                                    "full_name" to user!!.displayName.toString(),
-                                    "email" to user!!.email.toString(),
-                                    "password" to null,
-                                    "meta_api_key" to user!!.uid,
-                                    "google_api_key" to null,
-                                    "profile_picture" to user!!.photoUrl.toString()
-                                )
-                                if (true) { // Not in table
-                                    vm.addNewUser(body)
-                                }
                                 navController.navigate(DestinationScreen.Home.route)
                             }
                         }
