@@ -44,7 +44,7 @@ class MainViewModel: ViewModel() {
     fun fetchDetailPage(id: String) {
         viewModelScope.launch {
             try {
-                val resp = seriesService.getDetailPage(id)
+                val resp = seriesService.getDetailPage(id.toLong())
                 _detailState.value = _detailState.value.copy(
                     obj = resp.tvShow,
                     loading = false,
@@ -59,15 +59,6 @@ class MainViewModel: ViewModel() {
         }
     }
 
-    fun getFavDetails(idList: List<Long>) {
-        for (id in idList) {
-            fetchDetailPage(id.toString())
-            val seriesDetail = detailState.value.obj
-            Log.d("ELSE", seriesDetail.id)
-            detailList.add(seriesDetail)
-        }
-        Log.d("LISTAAAAA", detailList.toString())
-    }
 
     fun fetchSearch(query: String){
         viewModelScope.launch{

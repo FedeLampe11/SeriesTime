@@ -32,6 +32,7 @@ data class Episode(
     val airDate: String
 ): Parcelable
 
+
 @Parcelize
 data class Details(
     val id: String,

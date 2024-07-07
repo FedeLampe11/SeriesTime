@@ -272,21 +272,7 @@ fun CarouselItem(series: Series, navController: NavController) {
 
 @Composable
 fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences){
-    val yourListReplyState = apiViewModel.detailState.value
 
-    vm.getFavorites(currUser.getLong("id", -1L))
-    val idList: List<Long> = vm.favoriteState.value.list
-    apiViewModel.getFavDetails(idList)
-    val list = apiViewModel.detailList
-    /*val list: MutableList<Details> = mutableListOf()
-
-    for (id in idList) {
-        apiViewModel.fetchDetailPage(id.toString())
-        val seriesDetail = yourListReplyState.obj
-        Log.d("ELSE", seriesDetail.id)
-        list.add(seriesDetail)
-    }
-    Log.d("LISTAAAAA", list.toString())*/
 
     Column (
         modifier = Modifier
@@ -327,7 +313,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
             modifier = Modifier
                 .height(150.dp)
         ) {
-            items(list){
+            items(vm.favoriteState.value.list){
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -394,6 +380,7 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
 
     val apiViewModel: MainViewModel = viewModel()
     val viewState by apiViewModel.seriesState
+    vm.getFavorites(currUser.getLong("id", -1L))
 
     Scaffold (
         modifier = Modifier

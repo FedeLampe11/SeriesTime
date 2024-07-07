@@ -15,7 +15,7 @@ interface APIService {
     suspend fun getMostPopular(): Reply
 
     @GET("show-details")
-    suspend fun getDetailPage(@Query("q") id: String): EpReply
+    suspend fun getDetailPage(@Query("q") id: Long): EpReply
 
     @GET("search")
     suspend fun getSearchPage(@Query("q") query: String): Reply
