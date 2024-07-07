@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -285,7 +286,7 @@ fun CarouselItem(series: Series, navController: NavController) {
 }
 
 @Composable
-fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel){
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences){
     val yourListReplyState = apiViewModel.detailState.value
 
     //vm.getFavorites()
@@ -404,7 +405,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuccessScreen(navController: NavController, vm: FbViewModel) {
+fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
 
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val photoUrl = user?.photoUrl
@@ -516,6 +517,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewstate, vm)
+        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewstate, vm, currUser)
     }
 }

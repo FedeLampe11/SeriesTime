@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -95,7 +96,7 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavouriteScreen (navController: NavController, vm: FbViewModel) {
+fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val photoUrl = user?.photoUrl
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())

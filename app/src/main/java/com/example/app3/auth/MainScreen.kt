@@ -1,5 +1,7 @@
 package com.example.app3.auth
 
+import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.net.Uri
 import android.widget.VideoView
 import androidx.compose.foundation.Image
@@ -66,9 +68,7 @@ fun VideoBackground(uri: Uri) {
 }
 
 @Composable
-fun MainScreen(navController: NavController, vm: FbViewModel) {
-    // Initialize user
-    Firebase.auth.signOut()
+fun MainScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
 
     val videoUri = Uri.parse("android.resource://${LocalContext.current.packageName}/${R.raw.intro_background_cut}")
 
@@ -86,10 +86,10 @@ fun MainScreen(navController: NavController, vm: FbViewModel) {
             Text(
                 text = "SERIES\nTIME",
                 style = TextStyle(
-                    fontSize = 26.sp,
+                    fontSize = 22.sp,
                     lineHeight = 24.sp,
                     fontFamily = inter_font,
-                    fontWeight = FontWeight(700),
+                    fontWeight = FontWeight(600),
                     color = Color.White,
                 ),
                 modifier = Modifier.padding(top = 37.dp, start = 39.dp)
@@ -116,7 +116,10 @@ fun MainScreen(navController: NavController, vm: FbViewModel) {
                     .padding(start = 320.dp)
                     .size(300.dp)
                     .clickable {
-                        navController.navigate(DestinationScreen.Login.route)
+                        if (currUser.getLong("id", -1L) != -1L)
+                            navController.navigate(DestinationScreen.Home.route)
+                        else
+                            navController.navigate(DestinationScreen.Login.route)
                     }
             )
         }

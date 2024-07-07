@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,7 +51,7 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
 @Composable
-fun SignUpScreen(navController: NavController, vm: FbViewModel) {
+fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
     val emty by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -442,6 +443,11 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel) {
                 )
             }
             if (vm.signedIn.value) {
+                val edit = currUser.edit()
+                edit.putLong("id", vm.userState.value.obj.id)
+                edit.putString("name", vm.userState.value.obj.full_name)
+                edit.putString("picture", vm.userState.value.obj.profile_picture)
+                edit.apply()
                 navController.navigate(DestinationScreen.Home.route)
             }
             vm.signedIn.value = false

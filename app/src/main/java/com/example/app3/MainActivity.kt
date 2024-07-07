@@ -1,5 +1,6 @@
 package com.example.app3
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,26 +76,40 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
     val vm = hiltViewModel<FbViewModel>()
     val navController =  rememberNavController()
 
+    val currUser = LocalContext.current.getSharedPreferences("UserData", Context.MODE_PRIVATE)
+    val userEditor = currUser.edit()
+    // Initialize the preferences only if they are not already set
+    LaunchedEffect(Unit) {
+        if (!currUser.contains("userData")) {
+            userEditor.putLong("id", -1)
+            userEditor.putString("name", "")
+            userEditor.putString("picture", "")
+        }
+        userEditor.apply()
+    }
+
     NotificationMessage(vm)
 
-    NavHost(navController = navController, startDestination = DestinationScreen.Login.route) {
+    val startPage = if (currUser.getLong("id", -1L) == -1L) DestinationScreen.Main.route else DestinationScreen.Home.route
+
+    NavHost(navController = navController, startDestination = startPage) {
         composable(DestinationScreen.Main.route) {
-            MainScreen(navController, vm)
+            MainScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.SignUp.route) {
-            SignUpScreen(navController, vm)
+            SignUpScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Login.route) {
-            LoginScreen(navController, vm, callbackManager)
+            LoginScreen(navController, vm, callbackManager, currUser)
         }
         composable(DestinationScreen.Home.route) {
-            SuccessScreen(navController, vm)
+            SuccessScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Favourite.route) {
-            FavouriteScreen(navController, vm)
+            FavouriteScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Profile.route) {
-            ProfileScreen(navController, vm)
+            ProfileScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Detail.route) { backStackEntry ->
             val seriesId = backStackEntry.arguments?.getString("seriesId")

@@ -1,7 +1,10 @@
 package com.example.app3.auth
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,11 +63,13 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.switch_colors
+import com.example.app3.userService
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+@SuppressLint("WorldReadableFiles")
 @Composable
-fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?, navController: NavController) {
+fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: String?, navController: NavController, currUser: SharedPreferences) {
 
     val preferences = LocalContext.current.getSharedPreferences("Settings", Context.MODE_PRIVATE)
     val editor = preferences.edit()
@@ -115,14 +120,6 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
         if (name != "null") {
             Text(
                 text = name,
-                color = Color.White,
-                fontFamily = inter_font,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        } else {
-            Text(
-                text = Firebase.auth.currentUser?.email.toString(),
                 color = Color.White,
                 fontFamily = inter_font,
                 textAlign = TextAlign.Center,
@@ -181,7 +178,15 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
 
         Button(
             onClick = {
-                Firebase.auth.signOut()
+                if (Firebase.auth.currentUser != null)
+                    Firebase.auth.signOut()
+
+                val edit = currUser.edit()
+                edit.putLong("id", -1L)
+                edit.putString("name", "")
+                edit.putString("picture", "")
+                edit.apply()
+
                 navController.navigate(DestinationScreen.Main.route)
             },
             colors = ButtonColors(
@@ -210,10 +215,13 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, vm: FbViewModel) {
+fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    val name = user?.displayName.toString()
-    val photoUrl = user?.photoUrl
+
+    val name = currUser.getString("name", "")
+    val photoUrl = currUser.getString("picture", "")
+    Log.d("PRINT", "name $name, pic $photoUrl")
+
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold (
@@ -303,6 +311,6 @@ fun ProfileScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-        innerPadding -> ScrollProfilePage(innerPadding, name, photoUrl, navController)
+        innerPadding -> ScrollProfilePage(innerPadding, name + "", photoUrl, navController, currUser)
     }
 }

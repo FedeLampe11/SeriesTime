@@ -2,6 +2,7 @@ package com.example.app3.auth
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -80,7 +81,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: CallbackManager) {
+fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: CallbackManager, currUser: SharedPreferences) {
     val emty by remember { mutableStateOf("") }
 
     var email by remember { mutableStateOf("") }
@@ -303,6 +304,11 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 )
             }
             if (vm.signedIn.value) {
+                val edit = currUser.edit()
+                edit.putLong("id", vm.userState.value.obj.id)
+                edit.putString("name", vm.userState.value.obj.full_name)
+                edit.putString("picture", vm.userState.value.obj.profile_picture)
+                edit.apply()
                 navController.navigate(DestinationScreen.Home.route)
             }
             vm.signedIn.value = false
@@ -361,6 +367,17 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                         )
                         vm.addUserFromExternalService(body)
 
+                        if (vm.signedIn.value) {
+                            val edit = currUser.edit()
+                            edit.putLong("id", vm.userState.value.obj.id)
+                            edit.putString("name", vm.userState.value.obj.full_name)
+                            edit.putString(
+                                "picture",
+                                vm.userState.value.obj.profile_picture
+                            )
+                            edit.apply()
+                        }
+
                         navController.navigate(DestinationScreen.Home.route)
                     }
                 },
@@ -398,6 +415,17 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                                     "profile_picture" to user!!.photoUrl.toString()
                                 )
                                 vm.addUserFromExternalService(body)
+
+                                if (vm.signedIn.value) {
+                                    val edit = currUser.edit()
+                                    edit.putLong("id", vm.userState.value.obj.id)
+                                    edit.putString("name", vm.userState.value.obj.full_name)
+                                    edit.putString(
+                                        "picture",
+                                        vm.userState.value.obj.profile_picture
+                                    )
+                                    edit.apply()
+                                }
 
                                 navController.navigate(DestinationScreen.Home.route)
                             }
