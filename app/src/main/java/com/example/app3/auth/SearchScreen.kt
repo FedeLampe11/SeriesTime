@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -200,9 +201,9 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController, viewModel: FbViewModel) {
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    val photoUrl = user?.photoUrl
+fun SearchScreen(navController: NavController, viewModel: FbViewModel, currUser: SharedPreferences) {
+
+    val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val apiViewModel: MainViewModel = viewModel()
@@ -279,7 +280,7 @@ fun SearchScreen(navController: NavController, viewModel: FbViewModel) {
                     )
                 }
 
-                if (photoUrl != null)
+                if (photoUrl != null && photoUrl != "")
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(photoUrl)

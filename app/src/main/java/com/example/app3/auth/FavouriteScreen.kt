@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,9 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,18 +51,16 @@ import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 // Mocked series
-val series1 = Series("1", "Face", "", "", "", "", "", "", "",)
-val series2 = Series("2", "Book", "", "", "", "", "", "", "",)
+val series1 = Series("1", "Face", "", "", "", "", "", "", "")
+val series2 = Series("2", "Book", "", "", "", "", "", "", "")
 // TODO: metti le serie vere nei preferiti
 val favouriteList = mutableListOf(series1, series2, series1, series2, series1, series2, series1, series2, series1, series2, series1, series2, series1, series2)
     //.sortedBy { it.name } COMMAND TO SORT THE SERIES
 
 @Composable
-fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavController) {
+fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavController, vm: FbViewModel) {
     Column (
         modifier = Modifier.fillMaxSize()
             .background(Color.Black)
@@ -87,8 +82,12 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
             modifier = Modifier
                 .fillMaxSize()
         ){
-            items(favouriteList){
-                    series -> SeriesItem(series, showName = true, navController)
+            items(vm.favoriteState.value.list){
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    SeriesItem3(it, showName = true, navController)
+                }
             }
         }
     }
@@ -97,9 +96,10 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    val photoUrl = user?.photoUrl
+
+    val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    vm.getFavorites(currUser.getLong("id", -1L))
 
     Scaffold (
         modifier = Modifier
@@ -172,7 +172,7 @@ fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: Sh
                     )
                 }
 
-                if (photoUrl != null)
+                if (photoUrl != null && photoUrl != "")
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(photoUrl)
@@ -201,6 +201,6 @@ fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: Sh
             }
         }
     ) {
-        innerPadding -> ScrollFavouritePage(innerPadding, navController)
+        innerPadding -> ScrollFavouritePage(innerPadding, navController, vm)
     }
 }

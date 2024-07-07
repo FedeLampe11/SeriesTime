@@ -44,15 +44,12 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,13 +64,10 @@ import com.example.app3.DestinationScreen
 import com.example.app3.Details
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
-import com.example.app3.R
 import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
 
 @Composable
@@ -145,39 +139,6 @@ fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) 
                 }
                 IndicatorDots(size = numberOfSeries, currentIndex = pagerState.currentPage)
             }
-        }
-    }
-}
-
-@Composable
-fun SeriesItem(series: Series, showName: Boolean, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .width(110.dp)
-            .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
-            },
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Image(
-            //painter = rememberAsyncImagePainter(series.image_thumbnail_path),
-            painter = painterResource(id = R.drawable.facebook),
-            contentDescription = "Series Thumbnail",
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .padding(bottom = 4.dp)
-        )
-        if (showName) {
-            Text(
-                text = series.name + "",
-                color = Color.White,
-                fontFamily = inter_font,
-                fontSize = 20.sp,
-                style = TextStyle(fontWeight = FontWeight.Normal),
-                modifier = Modifier.padding(top = 4.dp)
-            )
         }
     }
 }
@@ -273,7 +234,6 @@ fun CarouselItem(series: Series, navController: NavController) {
 @Composable
 fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences){
 
-
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -311,7 +271,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
         LazyHorizontalGrid(
             GridCells.Fixed(1),
             modifier = Modifier
-                .height(150.dp)
+                .height(200.dp)
         ) {
             items(vm.favoriteState.value.list){
                 Box(
@@ -374,8 +334,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
 @Composable
 fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
 
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    val photoUrl = user?.photoUrl
+    val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val apiViewModel: MainViewModel = viewModel()
@@ -456,7 +415,7 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
                     )
                 }
 
-                if (photoUrl != null)
+                if (photoUrl != null && photoUrl != "")
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(photoUrl)

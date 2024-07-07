@@ -1,6 +1,5 @@
 package com.example.app3
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -51,6 +50,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
@@ -116,14 +116,14 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
         composable(DestinationScreen.Detail.route) { backStackEntry ->
             val seriesId = backStackEntry.arguments?.getString("seriesId")
             seriesId?.let {
-                DetailScreen(navController, vm, it)
+                DetailScreen(navController, vm, it, currUser)
             }
         }
         composable(DestinationScreen.Search.route) {
-            SearchScreen(navController, vm)
+            SearchScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Notification.route) {
-            NotificationScreen(navController, vm)
+            NotificationScreen(navController, vm, currUser)
         }
     }
 }

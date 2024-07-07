@@ -1,6 +1,6 @@
 package com.example.app3.auth
 
-import android.app.Notification
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,18 +26,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -47,10 +41,7 @@ import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
 import com.example.app3.ui.theme.darkBlue
-import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 // Change the API to connect to
 @Composable
@@ -75,14 +66,13 @@ fun Notifications(innerPadding: PaddingValues, navController: NavController, vie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(navController: NavController, vm: FbViewModel) {
+fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
 
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    val photoUrl = user?.photoUrl
+    val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val apiViewModel: MainViewModel = viewModel()
-    val viewstate by apiViewModel.seriesState
+    val viewState by apiViewModel.seriesState
 
     Scaffold (
         modifier = Modifier
@@ -144,7 +134,7 @@ fun NotificationScreen(navController: NavController, vm: FbViewModel) {
                     )
                 }
 
-                if (photoUrl != null)
+                if (photoUrl != null && photoUrl != "")
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(photoUrl)
@@ -173,6 +163,6 @@ fun NotificationScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-            innerPadding -> Notifications(innerPadding, navController, viewstate)
+            innerPadding -> Notifications(innerPadding, navController, viewState)
     }
 }

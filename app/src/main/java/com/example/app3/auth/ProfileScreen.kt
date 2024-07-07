@@ -75,12 +75,10 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
     val editor = preferences.edit()
     // Initialize the preferences only if they are not already set
     LaunchedEffect(Unit) {
-        if (!preferences.contains("ReceiveNotifications")) {
+        if (!preferences.contains("ReceiveNotifications"))
             editor.putBoolean("ReceiveNotifications", true)
-        }
-        if (!preferences.contains("HideAlreadySeenEpisodes")) {
+        if (!preferences.contains("HideAlreadySeenEpisodes"))
             editor.putBoolean("HideAlreadySeenEpisodes", false)
-        }
         editor.apply()
     }
 
@@ -96,7 +94,7 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (photoUrl != null) {
+        if (photoUrl != null && photoUrl != "") {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(photoUrl)
@@ -216,7 +214,6 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
 
     val name = currUser.getString("name", "")
     val photoUrl = currUser.getString("picture", "")
