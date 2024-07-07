@@ -63,7 +63,6 @@ import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
-import com.example.app3.userService
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -351,6 +350,17 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                     val gsc = GoogleSignIn.getClient(context, gso)
                     launcher.launch(gsc.signInIntent)
                     if (user != null) {
+                        val body = mapOf(
+                            "id" to null,
+                            "full_name" to user!!.displayName.toString(),
+                            "email" to user!!.email,
+                            "password" to null,
+                            "meta_api_key" to null,
+                            "google_api_key" to user!!.uid,
+                            "profile_picture" to user!!.photoUrl.toString()
+                        )
+                        vm.addUserFromExternalService(body)
+
                         navController.navigate(DestinationScreen.Home.route)
                     }
                 },
@@ -375,9 +385,20 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                             Log.d("FacebookLogin", "Login was successful. User ID: ${result.accessToken.userId}")
                             val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
                             Firebase.auth.signInWithCredential(credential)
+                            user = Firebase.auth.currentUser
 
-                            Log.d("FacebookLogin", "User: $result")
                             if (user != null) {
+                                val body = mapOf(
+                                    "id" to null,
+                                    "full_name" to user!!.displayName.toString(),
+                                    "email" to user!!.email,
+                                    "password" to null,
+                                    "meta_api_key" to user!!.uid,
+                                    "google_api_key" to null,
+                                    "profile_picture" to user!!.photoUrl.toString()
+                                )
+                                vm.addUserFromExternalService(body)
+
                                 navController.navigate(DestinationScreen.Home.route)
                             }
                         }

@@ -1,5 +1,6 @@
 package com.example.app3
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -74,7 +76,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
 
     NotificationMessage(vm)
 
-    NavHost(navController = navController, startDestination = DestinationScreen.Home.route) {
+    NavHost(navController = navController, startDestination = DestinationScreen.Login.route) {
         composable(DestinationScreen.Main.route) {
             MainScreen(navController, vm)
         }

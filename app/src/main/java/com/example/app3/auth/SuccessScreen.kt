@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -69,12 +70,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
+import com.example.app3.Details
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
 import com.example.app3.R
@@ -227,18 +230,18 @@ fun SeriesItem2(series: Series, showName: Boolean, navController: NavController)
 }
 
 @Composable
-fun SeriesItem3(seriesId: Long, showName: Boolean, navController: NavController, viewModel: MainViewModel.DetailState) {
+fun SeriesItem3(seriesDetails: Details, showName: Boolean, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
             .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(seriesId.toString()))
+                navController.navigate(DestinationScreen.Detail.createRoute(seriesDetails.id))
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = rememberAsyncImagePainter(viewModel.obj.image_thumbnail_path),
+            painter = rememberAsyncImagePainter(seriesDetails.image_thumbnail_path),
             contentDescription = "Series Thumbnail",
             modifier = Modifier
                 .fillMaxWidth()
@@ -247,7 +250,7 @@ fun SeriesItem3(seriesId: Long, showName: Boolean, navController: NavController,
         )
         if (showName) {
             Text(
-                text = viewModel.obj.name + "",
+                text = seriesDetails.name + "",
                 color = Color.White,
                 fontFamily = inter_font,
                 fontSize = 20.sp,
@@ -282,7 +285,13 @@ fun CarouselItem(series: Series, navController: NavController) {
 }
 
 @Composable
-fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState, viewState2: MainViewModel.DetailState, vm: FbViewModel){
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel){
+    val yourListReplyState = apiViewModel.detailState.value
+
+    //vm.getFavorites()
+    //val list = vm.favoriteState.value.obj
+    val list: List<Long> = mutableListOf(23455, 35624, 29560)
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -312,8 +321,36 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
             modifier = Modifier
                 .height(150.dp)
         ) {
-            items(vm.favoriteState.value.obj){
-                series -> SeriesItem3(series, showName = true, navController, viewState2)
+            items(list){
+
+                seriesId -> apiViewModel.fetchSearch(seriesId.toString())
+
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    when {
+                        yourListReplyState.loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .padding(top = 15.dp)
+                                    .padding(horizontal = 20.dp),
+                                color = ourRed,
+                            )
+                        }
+
+                        yourListReplyState.error != null -> {
+                            //Text(text = "Error occurred!")
+                            Text(text = "${viewState.error}")
+                        }
+
+                        else -> {
+                            val seriesDetail = yourListReplyState.obj
+                            Log.d("ELSE", seriesDetail.id)
+                            SeriesItem3(seriesDetail, showName = true, navController)
+                        }
+                    }
+                }
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -375,7 +412,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
 
     val apiViewModel: MainViewModel = viewModel()
     val viewstate by apiViewModel.seriesState
-    val viewState2 by apiViewModel.detailState
 
     Scaffold (
         modifier = Modifier
@@ -398,7 +434,8 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
                          fontWeight = FontWeight(700),
                          color = Color.White,
                      ),
-                     modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                     modifier = Modifier
+                         .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
                          .clickable { navController.navigate(DestinationScreen.Home.route) }
                  )
                  IconButton(
@@ -479,6 +516,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel) {
             }
         }
     ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, viewstate, viewState2, vm)
+        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewstate, vm)
     }
 }

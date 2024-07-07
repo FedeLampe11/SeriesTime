@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 
-var userId : Long = 52
+var userId : Long = 152
 
 @HiltViewModel
 class FbViewModel @Inject constructor(
@@ -61,36 +61,9 @@ class FbViewModel @Inject constructor(
             }
             inProgress.value = false
         }
-
-
-
-        /*auth.createUserWithEmailAndPassword(email, pass)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    signedIn.value = true
-                    handleException(it.exception, "signup successful")
-                } else {
-                    handleException(it.exception, "signup failed")
-                }
-                inProgress.value = false
-            }*/
     }
 
     fun login(email: String, pass: String) {
-        /*
-        inProgress.value = true
-
-        auth.signInWithEmailAndPassword(email, pass)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    signedIn.value = true
-                    handleException(it.exception, "login successful")
-                } else {
-                    handleException(it.exception, "login failed")
-                }
-                inProgress.value = false
-            }
-        */
         inProgress.value = true
 
         viewModelScope.launch{
@@ -115,6 +88,30 @@ class FbViewModel @Inject constructor(
         }
     }
 
+    fun addUserFromExternalService(body: Map<String, String?>) {
+        inProgress.value = true
+
+        viewModelScope.launch{
+            try{
+                val response = userService.postNewUser(body)
+                Log.d("DEBUG_server", "Tutto OK, id: ${response.id}")
+                userId = response.id
+                _userState.value = _userState.value.copy(
+                    obj = response,
+                    loading = false,
+                    error = null
+                )
+                signedIn.value = true
+            }catch (e: Exception){
+                Log.d("DEBUG_server", "SONO CATCH ${e.message}")
+                _userState.value = _userState.value.copy(
+                    loading = false,
+                    error = "Error adding new user ${e.message}"
+                )
+            }
+            inProgress.value = false
+        }
+    }
 
     fun getFavorites() {
         viewModelScope.launch{

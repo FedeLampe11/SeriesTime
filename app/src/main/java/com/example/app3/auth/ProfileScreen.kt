@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,16 +12,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -31,13 +29,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,10 +47,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,19 +61,33 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.switch_colors
 import com.google.firebase.Firebase
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 @Composable
 fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?, navController: NavController) {
-    val enabled = remember { mutableStateListOf(false, false, false, false) }
+
+    val preferences = LocalContext.current.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+    val editor = preferences.edit()
+    // Initialize the preferences only if they are not already set
+    LaunchedEffect(Unit) {
+        if (!preferences.contains("ReceiveNotifications")) {
+            editor.putBoolean("ReceiveNotifications", true)
+        }
+        if (!preferences.contains("HideAlreadySeenEpisodes")) {
+            editor.putBoolean("HideAlreadySeenEpisodes", false)
+        }
+        editor.apply()
+    }
+
+    var isNotificationChecked by remember { mutableStateOf(preferences.getBoolean("ReceiveNotifications", true)) }
+    var isHideChecked by remember { mutableStateOf(preferences.getBoolean("HideAlreadySeenEpisodes", false)) }
 
     Column (
         modifier = Modifier
             .background(Color.Black)
             .fillMaxSize()
-            .padding(top = 90.dp),
+            .padding(innerPadding)
+            .padding(top = 10.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -139,8 +145,12 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
                 maxLines = 2,
             )
             Switch(
-                checked = enabled[0],
-                onCheckedChange = { enabled[0] = it },
+                checked = isNotificationChecked,
+                onCheckedChange = { checked ->
+                    isNotificationChecked = checked
+                    editor.putBoolean("ReceiveNotifications", checked)
+                    editor.apply()
+                },
                 colors = switch_colors
             )
         }
@@ -159,8 +169,12 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Uri?,
                 maxLines = 2,
             )
             Switch(
-                checked = enabled[1],
-                onCheckedChange = { enabled[1] = it },
+                checked = isHideChecked,
+                onCheckedChange = { checked ->
+                    isHideChecked = checked
+                    editor.putBoolean("HideAlreadySeenEpisodes", checked)
+                    editor.apply()
+                },
                 colors = switch_colors
             )
         }
