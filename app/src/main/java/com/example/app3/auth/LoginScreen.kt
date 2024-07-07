@@ -309,6 +309,7 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 edit.putString("name", vm.userState.value.obj.full_name)
                 edit.putString("picture", vm.userState.value.obj.profile_picture)
                 edit.apply()
+                Log.d("BBBBBBB", "name ${vm.userState.value.obj.full_name}")
                 navController.navigate(DestinationScreen.Home.route)
             }
             vm.signedIn.value = false
@@ -366,16 +367,15 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                             "profile_picture" to user!!.photoUrl.toString()
                         )
                         vm.addUserFromExternalService(body)
+                        Log.d("AAAAAAAAAA", "name ${vm.userState.value.obj.full_name}")
 
                         if (vm.signedIn.value) {
                             val edit = currUser.edit()
                             edit.putLong("id", vm.userState.value.obj.id)
                             edit.putString("name", vm.userState.value.obj.full_name)
-                            edit.putString(
-                                "picture",
-                                vm.userState.value.obj.profile_picture
-                            )
+                            edit.putString("picture", vm.userState.value.obj.profile_picture)
                             edit.apply()
+                            Log.d("PRINT", "name ${currUser.getString("name", "")}")
                         }
 
                         navController.navigate(DestinationScreen.Home.route)

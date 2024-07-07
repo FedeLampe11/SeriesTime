@@ -4,10 +4,8 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,21 +20,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,34 +38,26 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -83,7 +69,6 @@ import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
 import com.example.app3.R
 import com.example.app3.Series
-import com.example.app3.seriesService
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
@@ -115,7 +100,7 @@ fun IndicatorDots(size: Int, currentIndex: Int) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) {
-    val numberOfSeries = 5;
+    val numberOfSeries = 5
     val pagerState = rememberPagerState(pageCount = { numberOfSeries })
     val topSeries = viewState.obj.tv_shows.take(numberOfSeries)
 
@@ -289,9 +274,19 @@ fun CarouselItem(series: Series, navController: NavController) {
 fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences){
     val yourListReplyState = apiViewModel.detailState.value
 
-    //vm.getFavorites()
-    //val list = vm.favoriteState.value.obj
-    val list: List<Long> = mutableListOf(23455, 35624, 29560)
+    vm.getFavorites(currUser.getLong("id", -1L))
+    val idList: List<Long> = vm.favoriteState.value.list
+    apiViewModel.getFavDetails(idList)
+    val list = apiViewModel.detailList
+    /*val list: MutableList<Details> = mutableListOf()
+
+    for (id in idList) {
+        apiViewModel.fetchDetailPage(id.toString())
+        val seriesDetail = yourListReplyState.obj
+        Log.d("ELSE", seriesDetail.id)
+        list.add(seriesDetail)
+    }
+    Log.d("LISTAAAAA", list.toString())*/
 
     Column (
         modifier = Modifier
@@ -300,7 +295,17 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
             .background(Color.Black)
             .padding(innerPadding)
     ){
-        Spacer(modifier = Modifier.height(15.dp))
+        Text(
+            text = "Welcome\n ${currUser.getString("name", "Bomber")}",
+            modifier = Modifier.fillMaxWidth()
+                .padding(vertical = 15.dp),
+            textAlign = TextAlign.Center,
+            color = Color.White,
+            fontFamily = inter_font,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 24.sp,
+            style = TextStyle(lineHeight = 35.sp)
+        )
 
         Carousel(navController, viewState)
         Spacer(modifier = Modifier.height(15.dp))
@@ -323,34 +328,10 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                 .height(150.dp)
         ) {
             items(list){
-
-                seriesId -> apiViewModel.fetchSearch(seriesId.toString())
-
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    when {
-                        yourListReplyState.loading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(top = 15.dp)
-                                    .padding(horizontal = 20.dp),
-                                color = ourRed,
-                            )
-                        }
-
-                        yourListReplyState.error != null -> {
-                            //Text(text = "Error occurred!")
-                            Text(text = "${viewState.error}")
-                        }
-
-                        else -> {
-                            val seriesDetail = yourListReplyState.obj
-                            Log.d("ELSE", seriesDetail.id)
-                            SeriesItem3(seriesDetail, showName = true, navController)
-                        }
-                    }
+                    SeriesItem3(it, showName = true, navController)
                 }
             }
         }
@@ -392,8 +373,8 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                         modifier = Modifier
                             .height(250.dp)
                     ) {
-                        items(viewState.obj.tv_shows){ series ->
-                            SeriesItem2(series, showName = true, navController)
+                        items(viewState.obj.tv_shows){
+                            series -> SeriesItem2(series, showName = true, navController)
                         }
                     }
                 }
@@ -412,7 +393,7 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val apiViewModel: MainViewModel = viewModel()
-    val viewstate by apiViewModel.seriesState
+    val viewState by apiViewModel.seriesState
 
     Scaffold (
         modifier = Modifier
@@ -517,6 +498,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
             }
         }
     ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewstate, vm, currUser)
+        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewState, vm, currUser)
     }
 }

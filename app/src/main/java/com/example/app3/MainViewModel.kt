@@ -17,6 +17,8 @@ class MainViewModel: ViewModel() {
     private val _searchState = mutableStateOf(ReplyState())
     val searchState: State<ReplyState> = _searchState
 
+    val detailList: MutableList<Details> = mutableListOf()
+
     init {
         fetchMostPopular()
     }
@@ -55,6 +57,16 @@ class MainViewModel: ViewModel() {
                 )
             }
         }
+    }
+
+    fun getFavDetails(idList: List<Long>) {
+        for (id in idList) {
+            fetchDetailPage(id.toString())
+            val seriesDetail = detailState.value.obj
+            Log.d("ELSE", seriesDetail.id)
+            detailList.add(seriesDetail)
+        }
+        Log.d("LISTAAAAA", detailList.toString())
     }
 
     fun fetchSearch(query: String){

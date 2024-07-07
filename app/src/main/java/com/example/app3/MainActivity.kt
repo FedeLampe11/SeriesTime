@@ -80,11 +80,13 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
     val userEditor = currUser.edit()
     // Initialize the preferences only if they are not already set
     LaunchedEffect(Unit) {
-        if (!currUser.contains("userData")) {
+        if (!currUser.contains("id"))
             userEditor.putLong("id", -1)
+        if (!currUser.contains("name"))
             userEditor.putString("name", "")
+        if (!currUser.contains("picture"))
             userEditor.putString("picture", "")
-        }
+
         userEditor.apply()
     }
 

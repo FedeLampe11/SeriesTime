@@ -11,8 +11,6 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 
-var userId : Long = 152
-
 @HiltViewModel
 class FbViewModel @Inject constructor(
     val auth: FirebaseAuth
@@ -38,14 +36,11 @@ class FbViewModel @Inject constructor(
             "google_api_key" to null,
             "profile_picture" to null
         )
-        Log.d("DEBUG_server", "1: $body")
         inProgress.value = true
 
         viewModelScope.launch{
             try{
                 val response = userService.postNewUser(body)
-                Log.d("DEBUG_server", "Tutto OK, id: ${response.id}")
-                userId = response.id
                 _userState.value = _userState.value.copy(
                     obj = response,
                     loading = false,
@@ -53,7 +48,6 @@ class FbViewModel @Inject constructor(
                 )
                 signedIn.value = true
             }catch (e: Exception){
-                Log.d("DEBUG_server", "SONO CATCH ${e.message}")
                 _userState.value = _userState.value.copy(
                     loading = false,
                     error = "Error adding new user ${e.message}"
@@ -69,8 +63,6 @@ class FbViewModel @Inject constructor(
         viewModelScope.launch{
             try{
                 val response = userService.loginUser(email, pass)
-                Log.d("DEBUG_server", "Tutto OK, id: ${response.id}")
-                userId = response.id
                 _userState.value = _userState.value.copy(
                     obj = response,
                     loading = false,
@@ -78,7 +70,6 @@ class FbViewModel @Inject constructor(
                 )
                 signedIn.value = true
             } catch (e: Exception) {
-                Log.d("DEBUG_server", "SONO CATCH ${e.message}")
                 _userState.value = _userState.value.copy(
                     loading = false,
                     error = "Error adding new user ${e.message}"
@@ -94,8 +85,6 @@ class FbViewModel @Inject constructor(
         viewModelScope.launch{
             try{
                 val response = userService.postNewUser(body)
-                Log.d("DEBUG_server", "Tutto OK, id: ${response.id}")
-                userId = response.id
                 _userState.value = _userState.value.copy(
                     obj = response,
                     loading = false,
@@ -103,7 +92,6 @@ class FbViewModel @Inject constructor(
                 )
                 signedIn.value = true
             }catch (e: Exception){
-                Log.d("DEBUG_server", "SONO CATCH ${e.message}")
                 _userState.value = _userState.value.copy(
                     loading = false,
                     error = "Error adding new user ${e.message}"
@@ -113,12 +101,12 @@ class FbViewModel @Inject constructor(
         }
     }
 
-    fun getFavorites() {
+    fun getFavorites(userId: Long) {
         viewModelScope.launch{
             try{
-                val response = userService.getFavourite(userState.value.obj.id)
+                val response = userService.getFavourite(userId)
                 _favoriteState.value = _favoriteState.value.copy(
-                    obj = response,
+                    list = response,
                     loading = false,
                     error = null
                 )
@@ -146,7 +134,7 @@ class FbViewModel @Inject constructor(
 
     data class FavoriteReplyState(
         val loading: Boolean = true,
-        val obj: List<Long> = listOf(-1),
+        val list: List<Long> = emptyList(),
         val error: String? = null
     )
 }
