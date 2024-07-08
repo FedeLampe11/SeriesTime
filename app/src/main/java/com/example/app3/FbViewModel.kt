@@ -1,12 +1,17 @@
 package com.example.app3
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
@@ -17,7 +22,7 @@ class FbViewModel @Inject constructor(
 ) : ViewModel() {
 
     val signedIn = mutableStateOf(false)
-    val inProgress = mutableStateOf(false)
+    private val inProgress = mutableStateOf(false)
     val popupNotification = mutableStateOf<Event<String>?>(null)
 
     private val _userState = mutableStateOf(UserReplyState())
@@ -25,6 +30,9 @@ class FbViewModel @Inject constructor(
 
     private val _favoriteState = mutableStateOf(FavoriteReplyState())
     val favoriteState: State<FavoriteReplyState> = _favoriteState
+
+    private val _modifyFavoriteState = mutableStateOf(ModifyFavoriteState())
+    val modifyFavoriteState: State<ModifyFavoriteState> = _modifyFavoriteState
 
     fun onSignUp(name: String, email: String, pass: String) {
         val body = mapOf(
@@ -117,7 +125,47 @@ class FbViewModel @Inject constructor(
             } catch (e: Exception) {
                 _favoriteState.value = _favoriteState.value.copy(
                     loading = false,
-                    error = "Error fetching most popular series ${e.message}"
+                    error = "Error fetching favorite series ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun addFavoriteSeries(userId: Long, seriesId: Long){
+        viewModelScope.launch{
+            try{
+                val body = mapOf(
+                    "userId" to userId,
+                    "seriesId" to seriesId
+                )
+                userService.addFavorite(body)
+
+                _modifyFavoriteState.value = _modifyFavoriteState.value.copy(
+                    loading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _favoriteState.value = _favoriteState.value.copy(
+                    loading = false,
+                    error = "Error adding series ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun removeFavoriteSeries(userId: Long, seriesId: Long){
+        viewModelScope.launch{
+            try{
+                userService.removeFavorite(userId, seriesId)
+
+                _modifyFavoriteState.value = _modifyFavoriteState.value.copy(
+                    loading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _favoriteState.value = _favoriteState.value.copy(
+                    loading = false,
+                    error = "Error adding series ${e.message}"
                 )
             }
         }
@@ -139,6 +187,11 @@ class FbViewModel @Inject constructor(
     data class FavoriteReplyState(
         val loading: Boolean = true,
         val list: List<Details> = emptyList(),
+        val error: String? = null
+    )
+
+    data class ModifyFavoriteState(
+        val loading: Boolean = true,
         val error: String? = null
     )
 }

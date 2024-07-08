@@ -34,6 +34,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +46,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -105,7 +106,11 @@ fun EpisodeRow(episode: Episode) {
 }
 
 @Composable
-fun ScrollDetailPage(obj: Details) {
+fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences) {
+    val userId = currUser.getLong("id", -1L)
+
+    val favorite = remember { mutableStateOf(vm.favoriteState.value.list.contains(obj)) }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -160,8 +165,8 @@ fun ScrollDetailPage(obj: Details) {
                     fontWeight = FontWeight.Bold,
                     color = ourRed,
                 )
-                // TODO: mettere controllo se serie è nei preferiti
-                if (false) {
+
+                if (favorite.value) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
                         contentDescription = "Favorite button",
@@ -169,7 +174,8 @@ fun ScrollDetailPage(obj: Details) {
                         modifier = Modifier
                             .size(40.dp)
                             .clickable {
-                                // TODO: togli dai preferiti
+                                vm.removeFavoriteSeries(userId, obj.id.toLong())
+                                favorite.value = !favorite.value
                             }
                     )
                 } else {
@@ -180,7 +186,8 @@ fun ScrollDetailPage(obj: Details) {
                         modifier = Modifier
                             .size(40.dp)
                             .clickable {
-                                // TODO: metti nei preferiti
+                                vm.addFavoriteSeries(userId, obj.id.toLong())
+                                favorite.value = !favorite.value
                             }
                     )
                 }
@@ -197,8 +204,7 @@ fun ScrollDetailPage(obj: Details) {
                     fontSize = 20.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Justify
+                    color = Color.White
                 )
             }
         }
@@ -210,7 +216,8 @@ fun ScrollDetailPage(obj: Details) {
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    modifier = Modifier.padding(horizontal = 30.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 30.dp)
                         .padding(bottom = 20.dp)
                 )
             }
@@ -343,7 +350,7 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String
                 }
 
                 else -> {
-                    ScrollDetailPage(viewState.obj)
+                    ScrollDetailPage(viewState.obj, vm, currUser)
                 }
             }
         }
