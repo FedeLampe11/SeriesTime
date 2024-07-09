@@ -7,8 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-private val retrofit = Retrofit.Builder().baseUrl("http://192.168.1.34:8080/") //localhost
-//private val retrofit = Retrofit.Builder().baseUrl("http://spring-api-env.eba-grqwbz5b.eu-north-1.elasticbeanstalk.com/")
+private val retrofit = Retrofit.Builder().baseUrl("http://kotlin-backend-env.eba-p3ttnvax.eu-north-1.elasticbeanstalk.com/")
     .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
     .build()
 
