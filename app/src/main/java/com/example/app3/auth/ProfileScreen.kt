@@ -1,9 +1,9 @@
 package com.example.app3.auth
 
 import android.annotation.SuppressLint
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,11 +32,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,7 +65,6 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.switch_colors
-import com.example.app3.userService
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -71,7 +72,9 @@ import com.google.firebase.auth.auth
 @Composable
 fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: String?, navController: NavController, currUser: SharedPreferences) {
 
-    val preferences = LocalContext.current.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+    val context = LocalContext.current
+
+    val preferences = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
     val editor = preferences.edit()
     // Initialize the preferences only if they are not already set
     LaunchedEffect(Unit) {
@@ -85,12 +88,15 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
     var isNotificationChecked by remember { mutableStateOf(preferences.getBoolean("ReceiveNotifications", true)) }
     var isHideChecked by remember { mutableStateOf(preferences.getBoolean("HideAlreadySeenEpisodes", false)) }
 
+    var selectedHour by remember { mutableIntStateOf(preferences.getInt("NotificationHour", 9)) }
+    var selectedMinute by remember { mutableIntStateOf(preferences.getInt("NotificationMinute", 0)) }
+
     Column (
         modifier = Modifier
             .background(Color.Black)
             .fillMaxSize()
             .padding(innerPadding)
-            .padding(top = 10.dp),
+            .padding(top = 20.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -120,6 +126,7 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
                 text = name,
                 color = Color.White,
                 fontFamily = inter_font,
+                fontSize = 26.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 16.dp)
             )
@@ -128,7 +135,7 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp, vertical = 12.dp)
+                .padding(horizontal = 25.dp, vertical = 12.dp)
                 .padding(top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -150,10 +157,59 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
             )
         }
 
+        if (isNotificationChecked) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 25.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Notification time",
+                    fontFamily = inter_font,
+                    color = Color.White,
+                    maxLines = 2,
+                )
+                TextButton(
+                    onClick = {
+
+                        TimePickerDialog(
+                            context,
+                            { _, hour: Int, minute: Int ->
+                                selectedHour = hour
+                                selectedMinute = minute
+                                editor.putInt("NotificationHour", hour)
+                                editor.putInt("NotificationMinute", minute)
+                                editor.apply()
+                            },
+                            selectedHour,
+                            selectedMinute,
+                            true
+                        ).show()
+                    },
+                    colors = ButtonColors(
+                        containerColor = ourRed,
+                        contentColor = Color.White,
+                        disabledContainerColor = ourRed,
+                        disabledContentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = String.format("%02d:%02d", selectedHour, selectedMinute),
+                        color = Color.White,
+                        fontFamily = inter_font,
+                        maxLines = 1
+                    )
+                }
+
+            }
+        }
+
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp, vertical = 12.dp),
+                .padding(horizontal = 25.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ){

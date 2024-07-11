@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -114,6 +115,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
     ) {
         item { // Static part
             Row(
@@ -203,7 +205,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     text = obj.description + "",
                     fontSize = 20.sp,
                     fontFamily = inter_font,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     color = Color.White
                 )
             }
@@ -212,7 +214,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
             item{
                 Text(
                     text = "Episodes",
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -226,6 +228,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
             }
         }
     }
+    Spacer(modifier = Modifier.height(12.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +30,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -74,125 +78,150 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
 
     var toggle = false
 
-    SearchBar(
-        query = text,
-        onQueryChange = { text = it },
-        onSearch = {
-            if (text.isNotEmpty())
-                if (history.contains(text)) {
-                    history.remove(text)
-                }
-                history.add(0, text)
-            active = false
-            // start fetching data
-            apiViewModel.fetchSearch(text)
-            toggle = true
-        },
-        active = active,
-        onActiveChange = { active = it },
-        modifier = Modifier
-            .fillMaxWidth()
+    Column (
+        modifier = Modifier.fillMaxSize()
             .padding(innerPadding)
-            .padding(10.dp),
-        placeholder = {
-            Text(
-                text = "Search...",
-                fontFamily = inter_font,
-                color = Color.LightGray,
-                fontWeight = FontWeight(500),
-                fontSize = 20.sp
-            )
-        },
-        leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = "Search Icon")
-        },
-        trailingIcon = {
-            if (active) {
-                IconButton(
-                    onClick = {
-                        if (text.isNotEmpty())
-                            text = ""
-                        else
-                            active = false
-                    }) {
-                    Icon(Icons.Default.Close, contentDescription = "Clear Search")
-                }
-            }
-        },
-    ) {
-        history.forEach {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp, horizontal = 20.dp)
-                    .clickable {
-                        text = it
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            .background(Color.Black)
+    ){
+        SearchBar(
+            query = text,
+            onQueryChange = { text = it },
+            onSearch = {
+                if (text.isNotEmpty())
+                    if (history.contains(text)) {
+                        history.remove(text)
+                    }
+                history.add(0, text)
+                active = false
+                // start fetching data
+                apiViewModel.fetchSearch(text)
+                toggle = true
+            },
+            active = active,
+            onActiveChange = { active = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                //.padding(innerPadding)
+                .padding(10.dp),
+            placeholder = {
                 Text(
-                    text = it,
+                    text = "Search...",
                     fontFamily = inter_font,
                     color = Color.LightGray,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(start = 20.dp)
+                    fontWeight = FontWeight(500),
+                    fontSize = 20.sp
                 )
-                IconButton(
-                    onClick = {
-                        history.remove(it)
-                    }) {
-                    Icon(Icons.Default.Close, contentDescription = "Clear Search")
-                }
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(top = 100.dp)
-            .padding(bottom = 15.dp)
-    ) {
-        when {
-            viewState.loading -> {
-                if (toggle) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = 15.dp),
-                        color = ourRed,
-                    )
-                }
-            }
-
-            viewState.error != null -> {
-                //Text(text = "Error occurred!")
-                Text(text = "${viewState.error}")
-            }
-
-            else -> {
-                if (viewState.obj.tv_shows.isNotEmpty()) {
-                    LazyVerticalGrid(
-                        GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        items(viewState.obj.tv_shows) { series ->
-                            SeriesItem2(series, showName = true, navController)
-                        }
+            },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = "Search Icon")
+            },
+            trailingIcon = {
+                if (active) {
+                    IconButton(
+                        onClick = {
+                            if (text.isNotEmpty())
+                                text = ""
+                            else
+                                active = false
+                        }) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear Search")
                     }
-                } else {
+                }
+            },
+            colors = SearchBarDefaults.colors(
+                containerColor = darkBlue,
+                dividerColor = Color.LightGray,
+                inputFieldColors = TextFieldDefaults.colors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    cursorColor = Color.White,
+                    focusedContainerColor = Color(0x30FFFFFF),
+                    unfocusedContainerColor = darkBlue,
+                    focusedLeadingIconColor = Color.LightGray,
+                    unfocusedLeadingIconColor = Color.LightGray,
+                    focusedLabelColor = Color.LightGray,
+                    unfocusedLabelColor = Color.LightGray,
+                    focusedTrailingIconColor = Color.Transparent,
+                    unfocusedTrailingIconColor = Color.LightGray,
+                    focusedTextColor = Color.LightGray,
+                    unfocusedTextColor = Color.LightGray
+                )
+            )
+        ) {
+            history.forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 5.dp, horizontal = 20.dp)
+                        .clickable {
+                            text = it
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        text = "Sorry no series corresponds to '$text'",
+                        text = it,
                         fontFamily = inter_font,
                         color = Color.LightGray,
                         fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxSize()
-                            .padding(30.dp)
+                        modifier = Modifier.padding(start = 20.dp)
                     )
+                    IconButton(
+                        onClick = {
+                            history.remove(it)
+                        }) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear Search", tint = Color.LightGray)
+                    }
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 12.dp)
+                .padding(bottom = 15.dp)
+        ) {
+            when {
+                viewState.loading -> {
+                    if (toggle) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(top = 15.dp),
+                            color = ourRed,
+                        )
+                    }
+                }
+
+                viewState.error != null -> {
+                    //Text(text = "Error occurred!")
+                    Text(text = "${viewState.error}")
+                }
+
+                else -> {
+                    if (viewState.obj.tv_shows.isNotEmpty()) {
+                        LazyVerticalGrid(
+                            GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            items(viewState.obj.tv_shows) { series ->
+                                SeriesItem2(series, showName = true, navController)
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "Sorry no series corresponds to '$text'",
+                            fontFamily = inter_font,
+                            color = Color.LightGray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(30.dp)
+                        )
+                    }
                 }
             }
         }

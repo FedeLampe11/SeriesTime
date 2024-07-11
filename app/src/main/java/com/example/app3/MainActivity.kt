@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,11 +21,13 @@ import com.example.app3.auth.DetailScreen
 import com.example.app3.auth.FavouriteScreen
 import com.example.app3.auth.LoginScreen
 import com.example.app3.auth.MainScreen
+import com.example.app3.auth.MyListViewModel
 import com.example.app3.auth.NotificationScreen
 import com.example.app3.auth.ProfileScreen
 import com.example.app3.auth.SearchScreen
 import com.example.app3.auth.SignUpScreen
 import com.example.app3.auth.SuccessScreen
+import com.example.app3.auth.createNotificationChannel
 import com.example.app3.main.NotificationMessage
 import com.example.app3.ui.theme.App3Theme
 import com.facebook.CallbackManager
@@ -35,6 +38,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var callbackManager: CallbackManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createNotificationChannel(this)
         callbackManager = CallbackManager.Factory.create()
         setContent {
             window.statusBarColor = getColor(R.color.black)
@@ -90,6 +94,8 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
         userEditor.apply()
     }
 
+    val listVM: MyListViewModel = viewModel()
+
     NotificationMessage(vm)
 
     val startPage = if (currUser.getLong("id", -1L) == -1L) DestinationScreen.Main.route else DestinationScreen.Home.route
@@ -123,7 +129,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             SearchScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Notification.route) {
-            NotificationScreen(navController, vm, currUser)
+            NotificationScreen(navController, vm, currUser, listVM)
         }
     }
 }

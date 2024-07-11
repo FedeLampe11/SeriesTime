@@ -52,17 +52,11 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
-// Mocked series
-val series1 = Series("1", "Face", "", "", "", "", "", "", "")
-val series2 = Series("2", "Book", "", "", "", "", "", "", "")
-// TODO: metti le serie vere nei preferiti
-val favouriteList = mutableListOf(series1, series2, series1, series2, series1, series2, series1, series2, series1, series2, series1, series2, series1, series2)
-    //.sortedBy { it.name } COMMAND TO SORT THE SERIES
-
 @Composable
 fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavController, vm: FbViewModel) {
     Column (
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(Color.Black)
             .padding(innerPadding)
     ) {
@@ -77,18 +71,35 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(15.dp))
-        LazyVerticalGrid(
-            GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxSize()
-        ){
-            items(vm.favoriteState.value.list){
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    SeriesItem3(it, showName = true, navController)
+        if (vm.favoriteState.value.list.isNotEmpty()) {
+            LazyVerticalGrid(
+                GridCells.Fixed(3),
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(vm.favoriteState.value.list) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        SeriesItem3(it, showName = true, navController)
+                    }
                 }
             }
+        } else {
+            Text(
+                text = "Seems like you don't like any series, go check some to add!",
+                color = ourRed,
+                fontFamily = inter_font,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(horizontal = 30.dp)
+                    .padding(vertical = 20.dp)
+                    .clickable {
+                        navController.navigate(DestinationScreen.Search.route)
+                    }
+            )
         }
     }
 }
@@ -122,7 +133,8 @@ fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: Sh
                         fontWeight = FontWeight(700),
                         color = Color.White,
                     ),
-                    modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                    modifier = Modifier
+                        .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
                         .clickable { navController.navigate(DestinationScreen.Home.route) }
                 )
                 IconButton(

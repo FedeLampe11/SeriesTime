@@ -243,7 +243,8 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
     ){
         Text(
             text = "Welcome\n ${currUser.getString("name", "Bomber")}",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(vertical = 15.dp),
             textAlign = TextAlign.Center,
             color = Color.White,
@@ -268,20 +269,37 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                 .padding(vertical = 15.dp)
         )
 
-        LazyHorizontalGrid(
-            GridCells.Fixed(1),
-            modifier = Modifier
-                .height(200.dp)
-        ) {
-            items(vm.favoriteState.value.list){
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    SeriesItem3(it, showName = true, navController)
+        if (vm.favoriteState.value.list.isNotEmpty()) {
+            LazyHorizontalGrid(
+                GridCells.Fixed(1),
+                modifier = Modifier
+                    .height(250.dp)
+            ) {
+                items(vm.favoriteState.value.list) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        SeriesItem3(it, showName = true, navController)
+                    }
                 }
             }
+            Spacer(modifier = Modifier.height(15.dp))
+        } else {
+            Text(
+                text = "Seems like you don't like any series, go check some to add!",
+                color = Color.White,
+                fontFamily = inter_font,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(horizontal = 40.dp)
+                    .padding(vertical = 20.dp)
+                    .clickable {
+                        navController.navigate(DestinationScreen.Search.route)
+                    }
+            )
         }
-        Spacer(modifier = Modifier.height(15.dp))
 
         Text(
             text = "Popular Series",
@@ -310,7 +328,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
 
                 viewState.error != null -> {
                     //Text(text = "Error occurred!")
-                    Text(text = "${viewState.error}")
+                    Text(text = "${viewState.error}", textAlign = TextAlign.Center)
                 }
 
                 else -> {
