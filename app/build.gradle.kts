@@ -81,6 +81,7 @@ dependencies {
     implementation ("androidx.navigation:navigation-compose:2.7.7")
     implementation ("com.google.dagger:hilt-android:2.48")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     kapt ("com.google.dagger:hilt-android-compiler:2.48")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 

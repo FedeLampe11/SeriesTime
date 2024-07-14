@@ -1,7 +1,6 @@
 package com.example.app3.auth
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -144,7 +143,7 @@ fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) 
 }
 
 @Composable
-fun SeriesItem2(series: Series, showName: Boolean, navController: NavController) {
+fun SeriesItem(series: Series, showName: Boolean, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -177,7 +176,7 @@ fun SeriesItem2(series: Series, showName: Boolean, navController: NavController)
 }
 
 @Composable
-fun SeriesItem3(seriesDetails: Details, showName: Boolean, navController: NavController) {
+fun SeriesItem2(seriesDetails: Details, showName: Boolean, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -279,26 +278,35 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                     Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        SeriesItem3(it, showName = true, navController)
+                        SeriesItem2(it, showName = true, navController)
                     }
                 }
             }
             Spacer(modifier = Modifier.height(15.dp))
         } else {
-            Text(
-                text = "Seems like you don't like any series, go check some to add!",
-                color = Color.White,
-                fontFamily = inter_font,
-                fontWeight = FontWeight.Normal,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(horizontal = 40.dp)
-                    .padding(vertical = 20.dp)
-                    .clickable {
-                        navController.navigate(DestinationScreen.Search.route)
-                    }
-            )
+            if (vm.favoriteState.value.loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 15.dp),
+                    color = ourRed,
+                )
+            } else {
+                Text(
+                    text = "Seems like you don't like any series, go check some to add!",
+                    color = Color.White,
+                    fontFamily = inter_font,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 40.dp)
+                        .padding(vertical = 20.dp)
+                        .clickable {
+                            navController.navigate(DestinationScreen.Search.route)
+                        }
+                )
+            }
         }
 
         Text(
@@ -338,7 +346,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                             .height(250.dp)
                     ) {
                         items(viewState.obj.tv_shows){
-                            series -> SeriesItem2(series, showName = true, navController)
+                            series -> SeriesItem(series, showName = true, navController)
                         }
                     }
                 }

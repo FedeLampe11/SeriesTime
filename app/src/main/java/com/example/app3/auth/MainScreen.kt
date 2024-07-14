@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.widget.VideoView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -149,7 +147,7 @@ fun MainScreen(navController: NavController, vm: FbViewModel, currUser: SharedPr
                     .size(300.dp)
                     .clickable {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            Log.d("LOGGG", "Value: $hasNotificationPermission")
+                            //Log.d("LOG", "Value: $hasNotificationPermission")
                             launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                         if (currUser.getLong("id", -1L) != -1L)

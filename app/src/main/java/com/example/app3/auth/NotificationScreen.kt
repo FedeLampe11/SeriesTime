@@ -1,11 +1,13 @@
 package com.example.app3.auth
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,9 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,14 +50,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -63,11 +61,11 @@ import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.Details
 import com.example.app3.FbViewModel
-import com.example.app3.MainViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import java.time.LocalDateTime
 
 class MyListViewModel : ViewModel() {
     // Create a stateful list inside the ViewModel
@@ -87,25 +85,42 @@ fun createNotificationChannel(context: Context) {
     }
 }
 
-fun sendNotification(context: Context, series: Details) {
+@RequiresApi(Build.VERSION_CODES.O)
+fun sendNotification(context: Context, series: Details, listVM: MyListViewModel) {
     val preferences = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-    if (preferences.getBoolean("ReceiveNotifications", true)) {
-        val notification = NotificationCompat.Builder(context, "Notifications")
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("${series.name}!")
-            .setContentText("New episode available")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+    val hour = preferences.getInt("NotificationHour", 9)
+    val minute = preferences.getInt("NotificationMinute", 0)
+    val currentTime = LocalDateTime.now()
+    val targetTime = currentTime.withHour(hour).withMinute(minute).withSecond(0).withNano(0)
 
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(1, notification)
+    val delay = if (targetTime.isAfter(currentTime)) {
+        java.time.Duration.between(currentTime, targetTime).toMillis()
+    } else {
+        java.time.Duration.between(currentTime, targetTime.plusDays(1)).toMillis()
+    }
+
+    if (preferences.getBoolean("ReceiveNotifications", true)) {
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({
+            val notification = NotificationCompat.Builder(context, "Notifications")
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle("${series.name}!")
+                .setContentText("New episode airs today!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build()
+
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            notificationManager.notify(1, notification)
+            listVM.items.add(series)
+        }, delay)
     }
 }
 
 @Composable
-fun NotificationRow(details: Details, navController: NavController) {
+fun NotificationRow(details: Details, navController: NavController, listVM: MyListViewModel) {
     Row (
         modifier = Modifier
             .fillMaxSize()
@@ -115,7 +130,7 @@ fun NotificationRow(details: Details, navController: NavController) {
                 navController.navigate(DestinationScreen.Detail.createRoute(details.id))
             },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceAround
     ){
         Image(
             painter = rememberAsyncImagePainter(details.image_thumbnail_path),
@@ -128,14 +143,26 @@ fun NotificationRow(details: Details, navController: NavController) {
             text = "New episode available for ${details.name}",
             color = Color.White,
             fontFamily = inter_font,
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             style = TextStyle(fontWeight = FontWeight.Normal),
-            maxLines = 3
+            maxLines = 3,
+            modifier = Modifier.weight(1f)
         )
-
+        IconButton(
+            onClick = {
+                listVM.items.remove(details)
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                tint = Color.White,
+                contentDescription = "Remove notification"
+            )
+        }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotificationPage(innerPadding: PaddingValues, navController: NavController, listVM: MyListViewModel, vm: FbViewModel) {
 
@@ -143,21 +170,21 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
 
     LazyColumn(
         modifier = Modifier
+            .fillMaxSize()
             .padding(innerPadding)
-            .background(Color.Black)
-            .fillMaxSize(),
+            .background(Color.Black),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (listVM.items.isNotEmpty()) {
             items(listVM.items){
-                details -> NotificationRow(details, navController)
+                details -> NotificationRow(details, navController, listVM)
             }
         } else {
             item {
                 Column (
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(10.dp),
+                        .padding(top = 50.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
@@ -168,8 +195,8 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
                         fontSize = 20.sp,
                         style = TextStyle(fontWeight = FontWeight.Normal),
                         modifier = Modifier.clickable {
-                            sendNotification(context, vm.favoriteState.value.list[0])
-                            listVM.items.add(vm.favoriteState.value.list[0])
+                            sendNotification(context, vm.favoriteState.value.list[0], listVM)
+                            //listVM.items.add(vm.favoriteState.value.list[0])
                         }
                     )
                 }
@@ -178,15 +205,13 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
 
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
-    val apiViewModel: MainViewModel = viewModel()
-    val viewState by apiViewModel.seriesState
 
     Scaffold (
         modifier = Modifier
@@ -196,18 +221,29 @@ fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: 
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(darkBlue),
+                    .background(darkBlue)
+                    .padding(horizontal = 15.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp),
                     onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         tint = Color.White,
                         contentDescription = "Go back to last page"
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        listVM.items.clear()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Clear,
+                        tint = ourRed,
+                        contentDescription = "Remove every notification"
                     )
                 }
             }

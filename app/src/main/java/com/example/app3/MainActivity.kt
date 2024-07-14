@@ -2,9 +2,11 @@ package com.example.app3
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,6 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var callbackManager: CallbackManager
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel(this)
@@ -75,6 +78,7 @@ sealed class DestinationScreen(val route: String) {
     object Notification: DestinationScreen("notification")
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AuthenticationApp(callbackManager: CallbackManager) {
     val vm = hiltViewModel<FbViewModel>()
@@ -97,6 +101,8 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
     val listVM: MyListViewModel = viewModel()
 
     NotificationMessage(vm)
+
+    RunCheckFavoritesDaily(vm, listVM)
 
     val startPage = if (currUser.getLong("id", -1L) == -1L) DestinationScreen.Main.route else DestinationScreen.Home.route
 

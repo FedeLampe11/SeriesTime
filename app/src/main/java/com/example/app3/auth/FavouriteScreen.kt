@@ -47,7 +47,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
-import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
@@ -81,7 +80,7 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
                     Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        SeriesItem3(it, showName = true, navController)
+                        SeriesItem2(it, showName = true, navController)
                     }
                 }
             }

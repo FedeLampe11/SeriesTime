@@ -28,10 +28,9 @@ data class Reply(
 data class Episode(
     val season: Int,
     val episode: Int,
-    val epName: String,
-    val airDate: String
+    val name: String,
+    val air_date: String
 ): Parcelable
-
 
 @Parcelize
 data class Details(
@@ -52,7 +51,7 @@ data class Details(
     val image_thumbnail_path: String?,
     val rating: String?,
     val rating_count: String?,
-    val countdown: String?,
+    val countdown: Episode?,
     val genres: List<String>?,
     val pictures: List<String>?,
     val episodes: List<Episode>?

@@ -63,8 +63,6 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
-// TODO: pensa se spostare il cuore in alto o meno
-
 @Composable
 fun EpisodeRow(episode: Episode) {
     Row (
@@ -150,6 +148,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     color = Color.White,
                     maxLines = 2
                 )
+                Text(text = obj.countdown?.toString() + "", color = Color.White)
             }
 
             Row(

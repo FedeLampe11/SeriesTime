@@ -173,7 +173,6 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
                 )
                 TextButton(
                     onClick = {
-
                         TimePickerDialog(
                             context,
                             { _, hour: Int, minute: Int ->

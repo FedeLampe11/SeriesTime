@@ -1,6 +1,5 @@
 package com.example.app3
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,8 +15,6 @@ class MainViewModel: ViewModel() {
 
     private val _searchState = mutableStateOf(ReplyState())
     val searchState: State<ReplyState> = _searchState
-
-    val detailList: MutableList<Details> = mutableListOf()
 
     init {
         fetchMostPopular()
@@ -86,7 +83,7 @@ class MainViewModel: ViewModel() {
 
     data class DetailState(
         val loading: Boolean = true,
-        val obj: Details = Details("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", emptyList(), emptyList(), emptyList()),
+        val obj: Details = Details("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", Episode(0,0,"",""), emptyList(), emptyList(), emptyList()),
         val error: String? = null
     )
 }
