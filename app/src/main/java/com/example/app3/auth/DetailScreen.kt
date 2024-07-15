@@ -1,12 +1,17 @@
 package com.example.app3.auth
 
 import android.content.SharedPreferences
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +46,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -63,43 +70,122 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EpisodeRow(episode: Episode) {
+fun EpisodeRow(episode: Episode, currUser: SharedPreferences) {
+    val hideEpisodes = currUser.getBoolean("HideAlreadySeenEpisodes", false)
+
+    val focusRequester = remember { FocusRequester() }
     Row (
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 30.dp)
             .border(width = 2.dp, shape = RectangleShape, color = darkBlue),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ){
-        Text(
-            text = "Season: ${episode.season} Ep: ${episode.episode}",
-            fontSize = 16.sp,
-            fontFamily = inter_font,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.padding(6.dp)
-        )
-        // TODO: metti segnale se episodio già visto
-        if (false) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = "Episode already seen",
-                tint = ourRed,
-                modifier = Modifier.clickable {
-                    // TODO: remove from seen list
+        if (!hideEpisodes) {
+            Box(
+                modifier = Modifier.weight(0.8f)
+            ) {
+                Column (
+                    modifier = Modifier.fillMaxSize()
+                ){
+                    Text(
+                        text = "Season: ${episode.season} Ep: ${episode.episode}",
+                        fontSize = 16.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(start = 25.dp, top = 6.dp)
+                    )
+                    Text(
+                        text = episode.name,
+                        fontSize = 16.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .padding(start = 19.dp)
+                            .basicMarquee(animationMode = MarqueeAnimationMode.WhileFocused)
+                            .focusRequester(focusRequester)
+                            .focusable()
+                            .clickable { focusRequester.requestFocus() },
+                    )
                 }
-            )
+            }
+            // TODO: check if episode already seen or not
+            if (true) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = "Episode already seen",
+                    tint = ourRed,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .weight(0.2f)
+                        .clickable {
+                            // TODO: remove from seen list
+                        }
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = "Episode not already seen",
+                    tint = ourRed,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .clickable {
+                            // TODO: add in seen list
+                        }
+                )
+            }
         } else {
-            Icon(
-                imageVector = Icons.Outlined.Add,
-                contentDescription = "Episode not already seen",
-                tint = ourRed,
-                modifier = Modifier.clickable {
-                    // TODO: add in seen list
+            // TODO: check if episode already seen or not
+            if (false) {
+                Box(
+                    modifier = Modifier.weight(0.8f)
+                ) {
+                    Column (
+                        modifier = Modifier.fillMaxSize()
+                    ){
+                        Text(
+                            text = "Season: ${episode.season} Ep: ${episode.episode}",
+                            fontSize = 16.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(start = 25.dp, top = 6.dp)
+                        )
+                        Text(
+                            text = episode.name,
+                            fontSize = 16.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .padding(start = 19.dp)
+                                .basicMarquee(animationMode = MarqueeAnimationMode.WhileFocused)
+                                .focusRequester(focusRequester)
+                                .focusable()
+                                .clickable { focusRequester.requestFocus() },
+                        )
+                    }
                 }
-            )
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = "Episode not already seen",
+                    tint = ourRed,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .clickable {
+                            // TODO: add in seen list
+                        }
+                )
+            }
         }
     }
 }
@@ -148,7 +234,6 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     color = Color.White,
                     maxLines = 2
                 )
-                Text(text = obj.countdown?.toString() + "", color = Color.White)
             }
 
             Row(
@@ -201,7 +286,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = obj.description + "",
+                    text = obj.description?.replace("<br>", "\n") + "",
                     fontSize = 20.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Normal,
@@ -223,7 +308,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                 )
             }
             items(obj.episodes) {
-                episode -> EpisodeRow(episode)
+                episode -> EpisodeRow(episode, currUser)
             }
         }
     }

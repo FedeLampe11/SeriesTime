@@ -310,6 +310,19 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
         }
 
         Text(
+            text = "Suggested for you",
+            color = Color.White,
+            fontFamily = inter_font,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(start = 40.dp)
+                .padding(vertical = 15.dp)
+        )
+        // TODO: add recommender system suggestions
+
+        Text(
             text = "Popular Series",
             color = Color.White,
             fontFamily = inter_font,

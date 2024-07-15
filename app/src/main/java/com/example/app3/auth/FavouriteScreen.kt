@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
@@ -53,6 +54,8 @@ import com.example.app3.ui.theme.ourRed
 
 @Composable
 fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavController, vm: FbViewModel) {
+    val favList = vm.favoriteState.value.list
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -70,13 +73,13 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(15.dp))
-        if (vm.favoriteState.value.list.isNotEmpty()) {
+        if (favList.isNotEmpty()) {
             LazyVerticalGrid(
                 GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(vm.favoriteState.value.list) {
+                items(favList) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
@@ -85,20 +88,36 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
                 }
             }
         } else {
-            Text(
-                text = "Seems like you don't like any series, go check some to add!",
-                color = ourRed,
-                fontFamily = inter_font,
-                fontWeight = FontWeight.Normal,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(horizontal = 30.dp)
-                    .padding(vertical = 20.dp)
-                    .clickable {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Seems like you don't like any series, go check some to add!",
+                    color = ourRed,
+                    fontFamily = inter_font,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 30.dp)
+                        .padding(vertical = 20.dp)
+                )
+                IconButton(
+                    onClick = {
                         navController.navigate(DestinationScreen.Search.route)
                     }
-            )
+                ) {
+                    Icon(
+                        modifier = Modifier.size(40.dp),
+                        imageVector = Icons.Filled.Search,
+                        tint = Color.White,
+                        contentDescription = "Go to search page"
+                    )
+                }
+            }
+
         }
     }
 }
