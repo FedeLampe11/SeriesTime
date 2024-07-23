@@ -195,13 +195,13 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                 }
 
                 else -> {
-                    if (viewState.obj.tv_shows.isNotEmpty()) {
+                    if (viewState.obj.isNotEmpty()) {
                         LazyVerticalGrid(
                             GridCells.Fixed(2),
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            items(viewState.obj.tv_shows) { series ->
+                            items(viewState.obj) { series ->
                                 SeriesItem(series, showName = true, navController)
                             }
                         }

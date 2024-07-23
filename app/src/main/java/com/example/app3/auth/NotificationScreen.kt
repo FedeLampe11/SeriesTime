@@ -133,7 +133,7 @@ fun NotificationRow(details: Details, navController: NavController, listVM: MyLi
         horizontalArrangement = Arrangement.SpaceAround
     ){
         Image(
-            painter = rememberAsyncImagePainter(details.image_thumbnail_path),
+            painter = rememberAsyncImagePainter(details.thumbnail),
             contentDescription = "Series Thumbnail",
             modifier = Modifier
                 .fillMaxHeight()

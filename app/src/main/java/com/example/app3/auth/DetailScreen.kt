@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -72,14 +73,16 @@ import com.example.app3.ui.theme.ourRed
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EpisodeRow(episode: Episode, currUser: SharedPreferences) {
-    val hideEpisodes = currUser.getBoolean("HideAlreadySeenEpisodes", false)
+fun EpisodeRow(episode: Episode) {
+    val context = LocalContext.current
+    val preferences = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+    val hideEpisodes by remember { mutableStateOf(preferences.getBoolean("HideAlreadySeenEpisodes", false)) }
 
     val focusRequester = remember { FocusRequester() }
     Row (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 30.dp)
+            .padding(vertical = 8.dp, horizontal = 20.dp)
             .border(width = 2.dp, shape = RectangleShape, color = darkBlue),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -143,7 +146,7 @@ fun EpisodeRow(episode: Episode, currUser: SharedPreferences) {
             }
         } else {
             // TODO: check if episode already seen or not
-            if (false) {
+            if (true) {
                 Box(
                     modifier = Modifier.weight(0.8f)
                 ) {
@@ -210,7 +213,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                 horizontalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(obj.image_thumbnail_path),
+                    painter = rememberAsyncImagePainter(obj.thumbnail),
                     contentDescription = "Series Thumbnail",
                     contentScale = ContentScale.FillHeight,
                     modifier = Modifier
@@ -232,7 +235,8 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    maxLines = 2
+                    maxLines = 2,
+                    lineHeight = 32.sp
                 )
             }
 
@@ -282,12 +286,12 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(30.dp),
+                    .padding(vertical = 30.dp, horizontal = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = obj.description?.replace("<br>", "\n") + "",
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Normal,
                     color = Color.White
@@ -298,7 +302,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
             item{
                 Text(
                     text = "Episodes",
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -308,7 +312,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                 )
             }
             items(obj.episodes) {
-                episode -> EpisodeRow(episode, currUser)
+                episode -> EpisodeRow(episode)
             }
         }
     }
@@ -422,12 +426,18 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String
         ) {
             when {
                 viewState.loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = 15.dp),
-                        color = ourRed,
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                            .background(Color.Black),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(top = 15.dp),
+                            color = ourRed,
+                        )
+                    }
                 }
 
                 viewState.error != null -> {

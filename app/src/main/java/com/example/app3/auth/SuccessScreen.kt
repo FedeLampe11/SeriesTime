@@ -63,7 +63,6 @@ import com.example.app3.DestinationScreen
 import com.example.app3.Details
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
-import com.example.app3.Series
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
@@ -95,7 +94,7 @@ fun IndicatorDots(size: Int, currentIndex: Int) {
 fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) {
     val numberOfSeries = 5
     val pagerState = rememberPagerState(pageCount = { numberOfSeries })
-    val topSeries = viewState.obj.tv_shows.take(numberOfSeries)
+    val topSeries = viewState.obj.take(numberOfSeries)
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -143,40 +142,7 @@ fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) 
 }
 
 @Composable
-fun SeriesItem(series: Series, showName: Boolean, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .width(150.dp)
-            .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
-            },
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Image(
-            painter = rememberAsyncImagePainter(series.image_thumbnail_path),
-            contentDescription = "Series Thumbnail",
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .padding(bottom = 4.dp)
-        )
-        if (showName) {
-            Text(
-                text = series.name + "",
-                color = Color.White,
-                fontFamily = inter_font,
-                fontSize = 20.sp,
-                style = TextStyle(fontWeight = FontWeight.Normal),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun SeriesItem2(seriesDetails: Details, showName: Boolean, navController: NavController) {
+fun SeriesItem(seriesDetails: Details, showName: Boolean, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -187,7 +153,7 @@ fun SeriesItem2(seriesDetails: Details, showName: Boolean, navController: NavCon
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = rememberAsyncImagePainter(seriesDetails.image_thumbnail_path),
+            painter = rememberAsyncImagePainter(seriesDetails.thumbnail),
             contentDescription = "Series Thumbnail",
             modifier = Modifier
                 .fillMaxWidth()
@@ -209,18 +175,18 @@ fun SeriesItem2(seriesDetails: Details, showName: Boolean, navController: NavCon
 }
 
 @Composable
-fun CarouselItem(series: Series, navController: NavController) {
+fun CarouselItem(detail: Details, navController: NavController) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxHeight()
             .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(series.id))
+                navController.navigate(DestinationScreen.Detail.createRoute(detail.id))
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = rememberAsyncImagePainter(series.image_thumbnail_path),
+            painter = rememberAsyncImagePainter(detail.thumbnail),
             contentDescription = "Series Thumbnail",
             modifier = Modifier
                 .fillMaxWidth()
@@ -278,17 +244,16 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                     Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        SeriesItem2(it, showName = true, navController)
+                        SeriesItem(it, showName = true, navController)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(15.dp))
         } else {
             if (vm.favoriteState.value.loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .padding(top = 15.dp),
+                        .padding(vertical = 15.dp),
                     color = ourRed,
                 )
             } else {
@@ -342,7 +307,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                     CircularProgressIndicator(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .padding(top = 15.dp),
+                            .padding(vertical = 15.dp),
                         color = ourRed,
                     )
                 }
@@ -358,7 +323,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                         modifier = Modifier
                             .height(250.dp)
                     ) {
-                        items(viewState.obj.tv_shows){
+                        items(viewState.obj){
                             series -> SeriesItem(series, showName = true, navController)
                         }
                     }

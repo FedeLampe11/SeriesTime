@@ -272,7 +272,6 @@ fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: Share
 
     val name = currUser.getString("name", "")
     val photoUrl = currUser.getString("picture", "")
-    Log.d("PRINT", "name $name, pic $photoUrl")
 
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 

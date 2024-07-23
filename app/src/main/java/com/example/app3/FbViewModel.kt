@@ -107,12 +107,9 @@ class FbViewModel @Inject constructor(
         viewModelScope.launch{
             try{
                 val response = userService.getFavourite(userId)
-                val detailList: MutableList<Details> = mutableListOf()
-                for (id in response){
-                    detailList.add(seriesService.getDetailPage(id).tvShow)
-                }
+
                 _favoriteState.value = _favoriteState.value.copy(
-                    list = detailList,
+                    list = response,
                     loading = false,
                     error = null
                 )

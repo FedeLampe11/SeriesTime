@@ -23,7 +23,7 @@ class MainViewModel: ViewModel() {
     private fun fetchMostPopular(){
         viewModelScope.launch{
             try{
-                val response = seriesService.getMostPopular()
+                val response = userService.getMostPopular()
                 _serieState.value = _serieState.value.copy(
                     obj = response,
                     loading = false,
@@ -41,9 +41,9 @@ class MainViewModel: ViewModel() {
     fun fetchDetailPage(id: String) {
         viewModelScope.launch {
             try {
-                val resp = seriesService.getDetailPage(id.toLong())
+                val resp = userService.getDetailPage(id.toLong())
                 _detailState.value = _detailState.value.copy(
-                    obj = resp.tvShow,
+                    obj = resp,
                     loading = false,
                     error = null
                 )
@@ -60,7 +60,7 @@ class MainViewModel: ViewModel() {
     fun fetchSearch(query: String){
         viewModelScope.launch{
             try{
-                val response = seriesService.getSearchPage(query)
+                val response = userService.getSearchPage(query)
                 _searchState.value = _searchState.value.copy(
                     obj = response,
                     loading = false,
@@ -77,13 +77,13 @@ class MainViewModel: ViewModel() {
 
     data class ReplyState(
         val loading: Boolean = true,
-        val obj: Reply = Reply("", -1, -1, emptyList()),
+        val obj: List<Details> = emptyList(),
         val error: String? = null
     )
 
     data class DetailState(
         val loading: Boolean = true,
-        val obj: Details = Details("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", Episode(0,0,"",""), emptyList(), emptyList(), emptyList()),
+        val obj: Details = Details("", "", "", "", "", "", "", "", emptyList(), Episode(0,-1,"",""), emptyList()),
         val error: String? = null
     )
 }

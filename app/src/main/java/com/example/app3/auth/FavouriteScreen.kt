@@ -1,6 +1,7 @@
 package com.example.app3.auth
 
 import android.content.SharedPreferences
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,16 +10,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
@@ -45,12 +46,80 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
+import com.example.app3.Details
 import com.example.app3.FbViewModel
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+
+@Composable
+fun SeriesRow(details: Details, navController: NavController) {
+    val countdown = details.countdown?.air_date?.take(10)
+
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable {
+                navController.navigate(DestinationScreen.Detail.createRoute(details.id))
+            },
+    ){
+        Image(
+            painter = rememberAsyncImagePainter(details.thumbnail),
+            contentDescription = "Series Thumbnail",
+            modifier = Modifier
+                .width(140.dp)
+                .aspectRatio(1f)
+                .padding(6.dp)
+        )
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 15.dp, horizontal = 10.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start
+        ){
+            Text(
+                text = details.name + "",
+                color = Color.White,
+                fontFamily = inter_font,
+                fontSize = 20.sp,
+                style = TextStyle(fontWeight = FontWeight.Bold),
+            )
+
+            val startDate = details.startDate?.take(4) + ""
+            //val startDate = "2022"
+            Text(
+                text = startDate,
+                color = Color.White,
+                fontFamily = inter_font,
+                fontSize = 14.sp,
+                style = TextStyle(fontWeight = FontWeight.Normal),
+            )
+
+            if (countdown != null) {
+                Text(
+                    text = "New Ep. airs on $countdown",
+                    color = Color.White,
+                    fontFamily = inter_font,
+                    fontSize = 14.sp,
+                    lineHeight = 16.sp
+                )
+            }
+
+            Text(
+                text = "${details.episodes?.last()?.season} seasons · ${details.status} · ${details.network}",
+                color = Color.White,
+                fontFamily = inter_font,
+                fontSize = 14.sp,
+            )
+        }
+    }
+}
 
 @Composable
 fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavController, vm: FbViewModel) {
@@ -74,16 +143,15 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
         )
         Spacer(modifier = Modifier.height(15.dp))
         if (favList.isNotEmpty()) {
-            LazyVerticalGrid(
-                GridCells.Fixed(3),
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+            LazyColumn (
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
                 items(favList) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        SeriesItem2(it, showName = true, navController)
+                        SeriesRow(it, navController)
                     }
                 }
             }

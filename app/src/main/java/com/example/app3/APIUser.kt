@@ -21,12 +21,21 @@ interface APIUser {
     suspend fun loginUser(@Query ("email") email: String, @Query("password") password: String): UserAuthReply
 
     @GET("v1/favorites")
-    suspend fun getFavourite(@Query ("user_id") userId: Long): List<Long>
+    suspend fun getFavourite(@Query ("user_id") userId: Long): List<Details>
 
     @POST("v1/favorites")
     suspend fun addFavorite(@Body body: Map<String, Long>)
 
     @DELETE("v1/favorites")
     suspend fun removeFavorite(@Query ("user_id") userId: Long, @Query ("series_id") seriesId: Long)
+
+    @GET("v1/series")
+    suspend fun getDetailPage(@Query("series_id") id: Long): Details
+
+    @GET("v1/series/search")
+    suspend fun getSearchPage(@Query("q") query: String): List<Details>
+
+    @GET("v1/series/most_popular")
+    suspend fun getMostPopular(): List<Details>
 
 }
