@@ -36,3 +36,9 @@ data class UserAuthReply(
     val google_api_key: String?,
     val profile_picture: String?
 ): Parcelable
+
+@Parcelize
+data class EpisodeReply(
+    val season: Int,
+    val episode: Int
+): Parcelable

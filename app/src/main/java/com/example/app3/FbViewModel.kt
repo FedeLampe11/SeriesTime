@@ -28,6 +28,15 @@ class FbViewModel @Inject constructor(
     private val _modifyFavoriteState = mutableStateOf(ModifyFavoriteState())
     val modifyFavoriteState: State<ModifyFavoriteState> = _modifyFavoriteState
 
+    private val _watchedState = mutableStateOf(WatchedReplyState())
+    val watchedState: State<WatchedReplyState> = _watchedState
+
+    private val _addWatchedState = mutableStateOf(ModifyWatchedState())
+    val addWatchedState: State<ModifyWatchedState> = _addWatchedState
+
+    private val _removeWatchedState = mutableStateOf(ModifyWatchedState())
+    val removeWatchedState: State<ModifyWatchedState> = _removeWatchedState
+
     fun onSignUp(name: String, email: String, pass: String) {
         val body = mapOf(
             "id" to null,
@@ -156,7 +165,74 @@ class FbViewModel @Inject constructor(
             } catch (e: Exception) {
                 _favoriteState.value = _favoriteState.value.copy(
                     loading = false,
-                    error = "Error adding series ${e.message}"
+                    error = "Error removing series ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun getWatched(userId: Long, seriesId: Long){
+        viewModelScope.launch{
+            try{
+                val response = userService.getWatchedEpisodes(userId, seriesId)
+
+                _watchedState.value = _watchedState.value.copy(
+                    list = response,
+                    loading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _watchedState.value = _watchedState.value.copy(
+                    loading = false,
+                    error = "Error fetching watched episodes ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun addWatchedEpisode(userId: Long, seriesId: Long, season: Long, episode: Long){
+        viewModelScope.launch{
+            try{
+                val body = mapOf(
+                    "userId" to userId,
+                    "seriesId" to seriesId,
+                    "season" to season,
+                    "episode" to episode
+                )
+                userService.addWatchedEpisode(body)
+
+                _addWatchedState.value = _addWatchedState.value.copy(
+                    loading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _addWatchedState.value = _addWatchedState.value.copy(
+                    loading = false,
+                    error = "Error adding episode ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun removeWatchedEpisode(userId: Long, seriesId: Long, season: Long, episode: Long){
+        viewModelScope.launch{
+            try{
+                val body = mapOf(
+                    "userId" to userId,
+                    "seriesId" to seriesId,
+                    "season" to season,
+                    "episode" to episode
+                )
+                userService.removeWatchedEpisode(body)
+
+                _removeWatchedState.value = _removeWatchedState.value.copy(
+                    loading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _removeWatchedState.value = _removeWatchedState.value.copy(
+                    loading = false,
+                    error = "Error removing episode ${e.message}"
                 )
             }
         }
@@ -182,6 +258,17 @@ class FbViewModel @Inject constructor(
     )
 
     data class ModifyFavoriteState(
+        val loading: Boolean = true,
+        val error: String? = null
+    )
+
+    data class WatchedReplyState(
+        val loading: Boolean = true,
+        val list: List<EpisodeReply> = emptyList(),
+        val error: String? = null
+    )
+
+    data class ModifyWatchedState(
         val loading: Boolean = true,
         val error: String? = null
     )

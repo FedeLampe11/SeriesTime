@@ -2,6 +2,7 @@ package com.example.app3.auth
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
@@ -65,6 +66,7 @@ import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.Details
 import com.example.app3.Episode
+import com.example.app3.EpisodeReply
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
 import com.example.app3.ui.theme.darkBlue
@@ -73,27 +75,30 @@ import com.example.app3.ui.theme.ourRed
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EpisodeRow(episode: Episode) {
+fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel) {
     val context = LocalContext.current
     val preferences = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
     val hideEpisodes by remember { mutableStateOf(preferences.getBoolean("HideAlreadySeenEpisodes", false)) }
 
+    val seenEpisodes = vm.watchedState.value.list
+    val ep = EpisodeReply(episode.season, episode.episode)
+
     val focusRequester = remember { FocusRequester() }
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 20.dp)
             .border(width = 2.dp, shape = RectangleShape, color = darkBlue),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         if (!hideEpisodes) {
             Box(
                 modifier = Modifier.weight(0.8f)
             ) {
-                Column (
+                Column(
                     modifier = Modifier.fillMaxSize()
-                ){
+                ) {
                     Text(
                         text = "Season: ${episode.season} Ep: ${episode.episode}",
                         fontSize = 16.sp,
@@ -119,17 +124,26 @@ fun EpisodeRow(episode: Episode) {
                     )
                 }
             }
-            // TODO: check if episode already seen or not
-            if (true) {
+
+            if (seenEpisodes.contains(ep)) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = "Episode already seen",
                     tint = ourRed,
                     modifier = Modifier
-                        .padding(end = 20.dp)
+                        .padding(end = 20.dp) //TODO: modify the padding to align with the add
                         .weight(0.2f)
                         .clickable {
-                            // TODO: remove from seen list
+                            Log.d(
+                                "TEST",
+                                "userId = $userId, seriesId = ${seriesId.toLong()}, ${episode.season.toLong()}, ${episode.episode.toLong()}"
+                            )
+                            vm.removeWatchedEpisode(
+                                userId,
+                                seriesId.toLong(),
+                                season = episode.season.toLong(),
+                                episode = episode.episode.toLong()
+                            )
                         }
                 )
             } else {
@@ -138,21 +152,25 @@ fun EpisodeRow(episode: Episode) {
                     contentDescription = "Episode not already seen",
                     tint = ourRed,
                     modifier = Modifier
-                        .padding(end = 20.dp)
+                        .padding(end = 20.dp) //TODO: modify the padding to align with the check
                         .clickable {
-                            // TODO: add in seen list
+                            vm.addWatchedEpisode(
+                                userId,
+                                seriesId.toLong(),
+                                season = episode.season.toLong(),
+                                episode = episode.episode.toLong()
+                            )
                         }
                 )
             }
         } else {
-            // TODO: check if episode already seen or not
-            if (true) {
+            if (seenEpisodes.contains(ep)) {
                 Box(
                     modifier = Modifier.weight(0.8f)
                 ) {
-                    Column (
+                    Column(
                         modifier = Modifier.fillMaxSize()
-                    ){
+                    ) {
                         Text(
                             text = "Season: ${episode.season} Ep: ${episode.episode}",
                             fontSize = 16.sp,
@@ -185,7 +203,12 @@ fun EpisodeRow(episode: Episode) {
                     modifier = Modifier
                         .padding(end = 20.dp)
                         .clickable {
-                            // TODO: add in seen list
+                            vm.addWatchedEpisode(
+                                userId,
+                                seriesId.toLong(),
+                                season = episode.season.toLong(),
+                                episode = episode.episode.toLong()
+                            )
                         }
                 )
             }
@@ -199,124 +222,140 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
 
     val favorite = remember { mutableStateOf(vm.favoriteState.value.list.contains(obj)) }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        item { // Static part
-            Row(
+    vm.getWatched(userId, obj.id.toLong())
+
+    if (vm.watchedState.value.loading){
+        Box (
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ){
+            CircularProgressIndicator(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(obj.thumbnail),
-                    contentDescription = "Series Thumbnail",
-                    contentScale = ContentScale.FillHeight,
+                    .align(Alignment.Center)
+                    .padding(vertical = 15.dp),
+                color = ourRed,
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            item { // Static part
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 30.dp, horizontal = 10.dp)
-                        .clipToBounds(),
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 40.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = obj.name + "",
-                    fontSize = 30.sp,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 2,
-                    lineHeight = 32.sp
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 40.dp)
-                    .padding(top = 30.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Rating: " + obj.rating + "",
-                    fontSize = 18.sp,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight.Bold,
-                    color = ourRed,
-                )
-
-                if (favorite.value) {
-                    Icon(
-                        imageVector = Icons.Filled.Favorite,
-                        contentDescription = "Favorite button",
-                        tint = ourRed,
+                        .fillMaxWidth()
+                        .height(400.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(obj.thumbnail),
+                        contentDescription = "Series Thumbnail",
+                        contentScale = ContentScale.FillHeight,
                         modifier = Modifier
-                            .size(40.dp)
-                            .clickable {
-                                vm.removeFavoriteSeries(userId, obj.id.toLong())
-                                favorite.value = !favorite.value
-                            }
+                            .fillMaxSize()
+                            .padding(vertical = 30.dp, horizontal = 10.dp)
+                            .clipToBounds(),
                     )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favorite button",
-                        tint = ourRed,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable {
-                                vm.addFavoriteSeries(userId, obj.id.toLong())
-                                favorite.value = !favorite.value
-                            }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = obj.name + "",
+                        fontSize = 30.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 2,
+                        lineHeight = 32.sp
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp)
+                        .padding(top = 30.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Rating: " + obj.rating + "",
+                        fontSize = 18.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Bold,
+                        color = ourRed,
+                    )
+
+                    if (favorite.value) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = "Favorite button",
+                            tint = ourRed,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable {
+                                    vm.removeFavoriteSeries(userId, obj.id.toLong())
+                                    favorite.value = !favorite.value
+                                }
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.FavoriteBorder,
+                            contentDescription = "Favorite button",
+                            tint = ourRed,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable {
+                                    vm.addFavoriteSeries(userId, obj.id.toLong())
+                                    favorite.value = !favorite.value
+                                }
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 30.dp, horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = obj.description?.replace("<br>", "\n") + "",
+                        fontSize = 18.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.White
                     )
                 }
             }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 30.dp, horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = obj.description?.replace("<br>", "\n") + "",
-                    fontSize = 18.sp,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.White
-                )
+            if (!obj.episodes.isNullOrEmpty()) {
+                item {
+                    Text(
+                        text = "Episodes",
+                        fontSize = 20.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(horizontal = 30.dp)
+                            .padding(bottom = 20.dp)
+                    )
+                }
+                items(obj.episodes) { episode ->
+                    EpisodeRow(episode, obj.id, userId, vm)
+                }
             }
         }
-        if (!obj.episodes.isNullOrEmpty()) {
-            item{
-                Text(
-                    text = "Episodes",
-                    fontSize = 20.sp,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier
-                        .padding(horizontal = 30.dp)
-                        .padding(bottom = 20.dp)
-                )
-            }
-            items(obj.episodes) {
-                episode -> EpisodeRow(episode)
-            }
-        }
+        Spacer(modifier = Modifier.height(12.dp))
     }
-    Spacer(modifier = Modifier.height(12.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -427,7 +466,8 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String
             when {
                 viewState.loading -> {
                     Column(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .background(Color.Black),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally

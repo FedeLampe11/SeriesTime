@@ -38,4 +38,12 @@ interface APIUser {
     @GET("v1/series/most_popular")
     suspend fun getMostPopular(): List<Details>
 
+    @GET("v1/watched")
+    suspend fun getWatchedEpisodes(@Query ("user_id") userId: Long, @Query ("series_id") seriesId: Long): List<EpisodeReply>
+
+    @POST("v1/watched")
+    suspend fun addWatchedEpisode(@Body body: Map<String, Long>)
+
+    @DELETE("v1/watched")
+    suspend fun removeWatchedEpisode(@Body body: Map<String, Long>)
 }
