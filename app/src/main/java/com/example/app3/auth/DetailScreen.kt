@@ -130,14 +130,13 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                     )
                 }
             }
-
+            // TODO: capire come aggiornare la pagina dopo che si ha aggiornato la lista di episodi visti (mettere flag se schiacciato + e viceversa)
             if (seenEpisodes.contains(ep)) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = "Episode already seen",
                     tint = ourRed,
                     modifier = Modifier
-                        .padding(end = 20.dp) //TODO: modify the padding to align with the add
                         .weight(0.2f)
                         .clickable {
                             Log.d(
@@ -158,7 +157,7 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                     contentDescription = "Episode not already seen",
                     tint = ourRed,
                     modifier = Modifier
-                        .padding(end = 20.dp) //TODO: modify the padding to align with the check
+                        .padding(end = 23.dp)
                         .clickable {
                             vm.addWatchedEpisode(
                                 userId,
