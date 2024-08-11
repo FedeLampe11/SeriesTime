@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,17 +32,23 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +60,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -216,6 +222,103 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SeasonDropDownMenu(details: Details, userId: Long, vm: FbViewModel){
+
+    val seasonList: MutableList<String> = mutableListOf()
+    if (!details.episodes.isNullOrEmpty()) {
+        for (ep in details.episodes) {
+            if (!seasonList.contains("Season "+ ep.season.toString())) {
+                seasonList.add("Season "+ ep.season.toString())
+            }
+        }
+        seasonList.add("All seasons")
+    }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedText by remember { mutableStateOf(seasonList[0]) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 20.dp),
+        contentAlignment = Alignment.Center
+    ){
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            },
+            modifier = Modifier.fillMaxSize()
+                .padding(horizontal = 30.dp)
+        ){
+            TextField(
+                value = selectedText,
+                onValueChange = { /* Do Nothing */ },
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor()
+                    .fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    cursorColor = Color.White,
+                    focusedContainerColor = Color(0x30FFFFFF),
+                    unfocusedContainerColor = darkBlue,
+                    focusedLeadingIconColor = Color.LightGray,
+                    unfocusedLeadingIconColor = Color.LightGray,
+                    focusedLabelColor = Color.LightGray,
+                    unfocusedLabelColor = Color.LightGray,
+                    focusedTrailingIconColor = Color.LightGray,
+                    unfocusedTrailingIconColor = Color.LightGray,
+                ),
+                textStyle = TextStyle(
+                    fontFamily = inter_font,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                seasonList.forEach { item ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = item,
+                                fontSize = 16.sp,
+                                fontFamily = inter_font,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        },
+                        onClick = {
+                            selectedText = item
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ){
+        val selectedSeason = if (selectedText == "All seasons") selectedText else selectedText.drop(7)
+        if (!details.episodes.isNullOrEmpty()) {
+            details.episodes.forEach { episode ->
+                if (episode.season.toString() == selectedSeason || selectedSeason == "All seasons")
+                    EpisodeRow(episode, details.id, userId, vm)
+            }
+        }
+    }
+}
+
 @Composable
 fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences) {
     val userId = currUser.getLong("id", -1L)
@@ -349,8 +452,8 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                             .padding(bottom = 20.dp)
                     )
                 }
-                items(obj.episodes) { episode ->
-                    EpisodeRow(episode, obj.id, userId, vm)
+                item {
+                    SeasonDropDownMenu(obj, userId, vm)
                 }
             }
         }
