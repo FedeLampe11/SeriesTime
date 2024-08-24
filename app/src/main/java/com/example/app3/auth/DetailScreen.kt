@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
@@ -46,6 +47,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -79,6 +81,7 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
+@SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel) {
@@ -87,13 +90,16 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
     val hideEpisodes by remember { mutableStateOf(preferences.getBoolean("HideAlreadySeenEpisodes", false)) }
 
     val seenEpisodes = vm.watchedState.value.list
+    val mutableList = remember { mutableStateListOf(*seenEpisodes.toTypedArray()) }
     val ep = EpisodeReply(episode.season, episode.episode)
 
     val focusRequester = remember { FocusRequester() }
+    val paddingRow = if (hideEpisodes && mutableList.contains(ep)) 0.dp else 8.dp
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 20.dp)
+            .padding(vertical = paddingRow, horizontal = 20.dp)
             .border(width = 2.dp, shape = RectangleShape, color = darkBlue),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -130,8 +136,8 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                     )
                 }
             }
-            // TODO: capire come aggiornare la pagina dopo che si ha aggiornato la lista di episodi visti (mettere flag se schiacciato + e viceversa)
-            if (seenEpisodes.contains(ep)) {
+            if (mutableList.contains(ep)) {
+            //if (seenEpisodes.contains(ep)) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = "Episode already seen",
@@ -149,6 +155,9 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                                 season = episode.season.toLong(),
                                 episode = episode.episode.toLong()
                             )
+
+                            mutableList.remove(ep)
+
                         }
                 )
             } else {
@@ -165,11 +174,13 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                                 season = episode.season.toLong(),
                                 episode = episode.episode.toLong()
                             )
+                            mutableList.add(ep)
                         }
                 )
             }
         } else {
-            if (seenEpisodes.contains(ep)) {
+            if (!mutableList.contains(ep)) {
+            //if (!seenEpisodes.contains(ep)) {
                 Box(
                     modifier = Modifier.weight(0.8f)
                 ) {
@@ -214,6 +225,7 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                                 season = episode.season.toLong(),
                                 episode = episode.episode.toLong()
                             )
+                            mutableList.add(ep)
                         }
                 )
             }
@@ -249,7 +261,8 @@ fun SeasonDropDownMenu(details: Details, userId: Long, vm: FbViewModel){
             onExpandedChange = {
                 expanded = !expanded
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(horizontal = 30.dp)
         ){
             TextField(
@@ -257,7 +270,8 @@ fun SeasonDropDownMenu(details: Details, userId: Long, vm: FbViewModel){
                 onValueChange = { /* Do Nothing */ },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier
+                    .menuAnchor()
                     .fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
                     unfocusedIndicatorColor = Color.Transparent,
