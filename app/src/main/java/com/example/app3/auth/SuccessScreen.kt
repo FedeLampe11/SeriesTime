@@ -1,6 +1,7 @@
 package com.example.app3.auth
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -63,9 +64,11 @@ import com.example.app3.DestinationScreen
 import com.example.app3.Details
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
+import com.example.app3.RecommenderViewModel
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import com.example.app3.ui.theme.ourYellow
 import kotlinx.coroutines.delay
 
 @Composable
@@ -197,7 +200,9 @@ fun CarouselItem(detail: Details, navController: NavController) {
 }
 
 @Composable
-fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences){
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, recommenderVM: RecommenderViewModel){
+
+    val recommenderState = recommenderVM.recommenderState.value
 
     Column (
         modifier = Modifier
@@ -285,7 +290,39 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                 .padding(start = 40.dp)
                 .padding(vertical = 15.dp)
         )
-        // TODO: add recommender system suggestions
+        // TODO: check recommender system suggestions
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when {
+                recommenderState.loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(vertical = 15.dp),
+                        color = ourRed,
+                    )
+                }
+
+                recommenderState.error != null -> {
+                    //Text(text = "Error occurred!")
+                    Text(text = "${recommenderState.error}", textAlign = TextAlign.Center)
+                }
+
+                else -> {
+                    Log.d("REC", "${recommenderState.list[0]}")
+                    LazyHorizontalGrid(
+                        GridCells.Fixed(1),
+                        modifier = Modifier
+                            .height(250.dp)
+                    ) {
+                        items(recommenderState.list) { series ->
+                            SeriesItem(series, showName = true, navController)
+                        }
+                    }
+                }
+            }
+        }
 
         Text(
             text = "Popular Series",
@@ -336,14 +373,17 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
+fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
 
+    val userId = currUser.getLong("id", -1L)
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val apiViewModel: MainViewModel = viewModel()
     val viewState by apiViewModel.seriesState
-    vm.getFavorites(currUser.getLong("id", -1L))
+    vm.getFavorites(userId)
+
+    recommenderVM.getRecommended(userId)
 
     Scaffold (
         modifier = Modifier
@@ -377,7 +417,7 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
                  ) {
                      Icon(
                          imageVector = Icons.Filled.Notifications,
-                         tint = Color.White,
+                         tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
                          contentDescription = "Go to notification page"
                      )
                  }
@@ -448,6 +488,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
             }
         }
     ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewState, vm, currUser)
+        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewState, vm, currUser, recommenderVM)
     }
 }

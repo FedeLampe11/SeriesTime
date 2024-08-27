@@ -122,7 +122,7 @@ fun MainScreen(navController: NavController, vm: FbViewModel, currUser: SharedPr
                     fontWeight = FontWeight(600),
                     color = Color.White,
                 ),
-                modifier = Modifier.padding(top = 37.dp, start = 39.dp)
+                modifier = Modifier.padding(top = 37.dp, start = 37.dp)
             )
 
             Spacer(modifier = Modifier.height(420.dp))
@@ -136,14 +136,14 @@ fun MainScreen(navController: NavController, vm: FbViewModel, currUser: SharedPr
                     fontWeight = FontWeight(1000),
                     color = Color.White,
                 ),
-                modifier = Modifier.padding(start = 37.dp)
+                modifier = Modifier.padding(horizontal = 37.dp)
             )
 
             Image(
                 painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(start = 320.dp)
+                    .padding(end = 37.dp)
                     .size(300.dp)
                     .clickable {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

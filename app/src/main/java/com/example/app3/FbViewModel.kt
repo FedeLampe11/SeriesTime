@@ -217,13 +217,7 @@ class FbViewModel @Inject constructor(
     fun removeWatchedEpisode(userId: Long, seriesId: Long, season: Long, episode: Long){
         viewModelScope.launch{
             try{
-                val body = mapOf(
-                    "userId" to userId,
-                    "seriesId" to seriesId,
-                    "season" to season,
-                    "episode" to episode
-                )
-                userService.removeWatchedEpisode(body)
+                userService.removeWatchedEpisode(userId, seriesId, season, episode)
 
                 _removeWatchedState.value = _removeWatchedState.value.copy(
                     loading = false,

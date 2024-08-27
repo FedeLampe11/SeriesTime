@@ -195,8 +195,8 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
                         fontSize = 20.sp,
                         style = TextStyle(fontWeight = FontWeight.Normal),
                         modifier = Modifier.clickable {
+                            // Only for demonstration purposes
                             sendNotification(context, vm.favoriteState.value.list[0], listVM)
-                            //listVM.items.add(vm.favoriteState.value.list[0])
                         }
                     )
                 }
@@ -242,7 +242,7 @@ fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: 
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Clear,
-                        tint = ourRed,
+                        tint = if(listVM.items.isNotEmpty()) ourRed else Color.LightGray,
                         contentDescription = "Remove every notification"
                     )
                 }

@@ -13,6 +13,7 @@ val Pink40 = Color(0xFF7D5260)
 
 val ourRed = Color(0xFFFF003D)
 val darkBlue = Color(0xFF202027)
+val ourYellow = Color(0xFFEEB300)
 
 val switch_colors = SwitchColors(
     checkedThumbColor = Color.White,

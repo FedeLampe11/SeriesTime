@@ -145,19 +145,13 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                     modifier = Modifier
                         .weight(0.2f)
                         .clickable {
-                            Log.d(
-                                "TEST",
-                                "userId = $userId, seriesId = ${seriesId.toLong()}, ${episode.season.toLong()}, ${episode.episode.toLong()}"
-                            )
                             vm.removeWatchedEpisode(
                                 userId,
                                 seriesId.toLong(),
                                 season = episode.season.toLong(),
                                 episode = episode.episode.toLong()
                             )
-
                             mutableList.remove(ep)
-
                         }
                 )
             } else {
@@ -279,10 +273,10 @@ fun SeasonDropDownMenu(details: Details, userId: Long, vm: FbViewModel){
                     cursorColor = Color.White,
                     focusedContainerColor = Color(0x30FFFFFF),
                     unfocusedContainerColor = darkBlue,
-                    focusedLeadingIconColor = Color.LightGray,
-                    unfocusedLeadingIconColor = Color.LightGray,
-                    focusedLabelColor = Color.LightGray,
-                    unfocusedLabelColor = Color.LightGray,
+                    focusedLeadingIconColor = Color.DarkGray,
+                    unfocusedLeadingIconColor = Color.DarkGray,
+                    focusedLabelColor = Color.DarkGray,
+                    unfocusedLabelColor = Color.DarkGray,
                     focusedTrailingIconColor = Color.LightGray,
                     unfocusedTrailingIconColor = Color.LightGray,
                 ),
@@ -295,7 +289,8 @@ fun SeasonDropDownMenu(details: Details, userId: Long, vm: FbViewModel){
             )
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(Color.DarkGray)
             ) {
                 seasonList.forEach { item ->
                     DropdownMenuItem(
@@ -444,7 +439,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = obj.description?.replace("<br>", "\n") + "",
+                        text = (obj.description?.replace("<br>", "\n")?.replace("<b>", "")?.replace("<br>", "")) + "",
                         fontSize = 18.sp,
                         fontFamily = inter_font,
                         fontWeight = FontWeight.Normal,

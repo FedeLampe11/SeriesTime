@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,12 +35,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,9 +58,11 @@ import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.Details
 import com.example.app3.FbViewModel
+import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import com.example.app3.ui.theme.ourYellow
 
 @Composable
 fun SeriesRow(details: Details, navController: NavController) {
@@ -92,7 +101,6 @@ fun SeriesRow(details: Details, navController: NavController) {
             )
 
             val startDate = details.startDate?.take(4) + ""
-            //val startDate = "2022"
             Text(
                 text = startDate,
                 color = Color.White,
@@ -122,8 +130,60 @@ fun SeriesRow(details: Details, navController: NavController) {
 }
 
 @Composable
+fun AZSortButton(
+        orderingType: List<String>,
+        onOrderSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(
+            onClick = { expanded = true }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_sort_24),
+                contentDescription = "Sort",
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ){
+            orderingType.forEach { order ->
+                DropdownMenuItem(
+                    onClick = {
+                        onOrderSelected(order)
+                        expanded = false
+                    },
+                    text = {
+                        Text(
+                            text = order,
+                            fontSize = 16.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    })
+            }
+        }
+    }
+}
+
+@Composable
 fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavController, vm: FbViewModel) {
     val favList = vm.favoriteState.value.list
+
+    val orderingType : MutableList<String> = mutableListOf("Addition Date", "Start Date", "Title")
+    var selectedText by remember { mutableStateOf(orderingType[0]) }
+
+    val sortedList by remember (selectedText) {
+        mutableStateOf(
+            when (selectedText) {
+                "Start Date" -> favList.sortedBy{ it.startDate }.reversed()
+                "Title" -> favList.sortedBy{ it.name }
+                else -> favList
+            }
+        )
+    }
 
     Column (
         modifier = Modifier
@@ -132,22 +192,43 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
             .padding(innerPadding)
     ) {
         Spacer(modifier = Modifier.height(15.dp))
-        Text(
-            text = "Favourite List",
-            color = ourRed,
-            fontFamily = inter_font,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 26.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 1.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(modifier = Modifier.weight(2f))
+            Text(
+                text = "Favorite Series",
+                color = ourRed,
+                fontFamily = inter_font,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
+                textAlign = TextAlign.Start,
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            AZSortButton(
+                orderingType = orderingType,
+                onOrderSelected = { selectedText = it }
+            )
+        }
+
+        /*when (selectedText) {
+            "Addition Date" -> favListCopy = favList
+            "Start Date" -> favListCopy.sortedBy { it.startDate }
+            "Title" -> favListCopy.sortedBy { it.name }
+        }*/
+
         Spacer(modifier = Modifier.height(15.dp))
         if (favList.isNotEmpty()) {
             LazyColumn (
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                items(favList) {
+                items(sortedList) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
@@ -192,7 +273,7 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
+fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
 
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -230,7 +311,7 @@ fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: Sh
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Notifications,
-                        tint = Color.White,
+                        tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
                         contentDescription = "Go to notification page"
                     )
                 }

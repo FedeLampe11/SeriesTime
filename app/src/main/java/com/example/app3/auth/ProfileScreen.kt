@@ -64,6 +64,7 @@ import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import com.example.app3.ui.theme.ourYellow
 import com.example.app3.ui.theme.switch_colors
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -201,7 +202,6 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
                         maxLines = 1
                     )
                 }
-
             }
         }
 
@@ -231,9 +231,6 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
 
         Button(
             onClick = {
-                if (Firebase.auth.currentUser != null)
-                    Firebase.auth.signOut()
-
                 val edit = currUser.edit()
                 edit.putLong("id", -1L)
                 edit.putString("name", "")
@@ -268,7 +265,7 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
+fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
 
     val name = currUser.getString("name", "")
     val photoUrl = currUser.getString("picture", "")
@@ -307,7 +304,7 @@ fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: Share
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Notifications,
-                        tint = Color.White,
+                        tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
                         contentDescription = "Go to notification page"
                     )
                 }

@@ -100,6 +100,8 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
 
     val listVM: MyListViewModel = viewModel()
 
+    val recommenderVM : RecommenderViewModel = viewModel()
+
     NotificationMessage(vm)
 
     RunCheckFavoritesDaily(vm, listVM)
@@ -117,13 +119,13 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             LoginScreen(navController, vm, callbackManager, currUser)
         }
         composable(DestinationScreen.Home.route) {
-            SuccessScreen(navController, vm, currUser)
+            SuccessScreen(navController, vm, currUser, listVM, recommenderVM)
         }
         composable(DestinationScreen.Favourite.route) {
-            FavouriteScreen(navController, vm, currUser)
+            FavouriteScreen(navController, vm, currUser, listVM)
         }
         composable(DestinationScreen.Profile.route) {
-            ProfileScreen(navController, vm, currUser)
+            ProfileScreen(navController, vm, currUser, listVM)
         }
         composable(DestinationScreen.Detail.route) { backStackEntry ->
             val seriesId = backStackEntry.arguments?.getString("seriesId")
@@ -132,7 +134,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             }
         }
         composable(DestinationScreen.Search.route) {
-            SearchScreen(navController, vm, currUser)
+            SearchScreen(navController, vm, currUser, listVM, recommenderVM)
         }
         composable(DestinationScreen.Notification.route) {
             NotificationScreen(navController, vm, currUser, listVM)

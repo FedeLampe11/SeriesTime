@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -57,24 +59,35 @@ import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
+import com.example.app3.RecommenderViewModel
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import com.example.app3.ui.theme.ourYellow
 
+
+// TODO: add the older researches by not deleting it every time we refresh the page
+// TODO: add the suggested for you series below the searchbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel) {
+fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, recommenderVM: RecommenderViewModel) {
 
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
+
+    var alreadySearched by remember { mutableStateOf(false) }
+
     val history = remember { mutableStateListOf<String>() }
 
     val viewState = apiViewModel.searchState.value
 
+    val recommenderState = recommenderVM.recommenderState.value
+
     var toggle = false
 
     Column (
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(innerPadding)
             .background(Color.Black)
     ){
@@ -91,12 +104,12 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                 // start fetching data
                 apiViewModel.fetchSearch(text)
                 toggle = true
+                if (!alreadySearched) alreadySearched = true
             },
             active = active,
             onActiveChange = { active = it },
             modifier = Modifier
                 .fillMaxWidth()
-                //.padding(innerPadding)
                 .padding(10.dp),
             placeholder = {
                 Text(
@@ -171,51 +184,85 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 12.dp)
-                .padding(bottom = 15.dp)
-        ) {
-            when {
-                viewState.loading -> {
-                    if (toggle) {
+        if(!alreadySearched) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when {
+                    recommenderState.loading -> {
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .padding(top = 15.dp),
+                                .padding(vertical = 15.dp),
                             color = ourRed,
                         )
                     }
-                }
 
-                viewState.error != null -> {
-                    //Text(text = "Error occurred!")
-                    Text(text = "${viewState.error}")
-                }
+                    recommenderState.error != null -> {
+                        //Text(text = "Error occurred!")
+                        Text(text = "${recommenderState.error}", textAlign = TextAlign.Center)
+                    }
 
-                else -> {
-                    if (viewState.obj.isNotEmpty()) {
-                        LazyVerticalGrid(
-                            GridCells.Fixed(2),
+                    else -> {
+                        LazyHorizontalGrid(
+                            GridCells.Fixed(1),
                             modifier = Modifier
-                                .fillMaxSize()
+                                .height(250.dp)
                         ) {
-                            items(viewState.obj) { series ->
+                            items(recommenderState.list) { series ->
                                 SeriesItem(series, showName = true, navController)
                             }
                         }
-                    } else {
-                        Text(
-                            text = "Sorry no series corresponds to '$text'",
-                            fontFamily = inter_font,
-                            color = Color.LightGray,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(30.dp)
-                        )
+                    }
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 12.dp)
+                    .padding(bottom = 15.dp)
+            ) {
+                when {
+                    viewState.loading -> {
+                        if (toggle) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .padding(top = 15.dp),
+                                color = ourRed,
+                            )
+                        }
+                    }
+
+                    viewState.error != null -> {
+                        //Text(text = "Error occurred!")
+                        Text(text = "${viewState.error}")
+                    }
+
+                    else -> {
+                        if (viewState.obj.isNotEmpty()) {
+                            LazyVerticalGrid(
+                                GridCells.Fixed(2),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            ) {
+                                items(viewState.obj) { series ->
+                                    SeriesItem(series, showName = true, navController)
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = "Sorry no series corresponds to '$text'",
+                                fontFamily = inter_font,
+                                color = Color.LightGray,
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(30.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -225,7 +272,7 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController, viewModel: FbViewModel, currUser: SharedPreferences) {
+fun SearchScreen(navController: NavController, viewModel: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
 
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -264,7 +311,7 @@ fun SearchScreen(navController: NavController, viewModel: FbViewModel, currUser:
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Notifications,
-                        tint = Color.White,
+                        tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
                         contentDescription = "Go to notification page"
                     )
                 }
@@ -334,7 +381,7 @@ fun SearchScreen(navController: NavController, viewModel: FbViewModel, currUser:
             }
         }
     ) {
-        innerPadding -> ScrollSearchPage(innerPadding, navController, apiViewModel)
+        innerPadding -> ScrollSearchPage(innerPadding, navController, apiViewModel, recommenderVM)
     }
 
 }

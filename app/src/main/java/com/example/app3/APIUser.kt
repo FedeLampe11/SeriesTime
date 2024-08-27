@@ -45,5 +45,5 @@ interface APIUser {
     suspend fun addWatchedEpisode(@Body body: Map<String, Long>)
 
     @DELETE("v1/watched")
-    suspend fun removeWatchedEpisode(@Body body: Map<String, Long>)
+    suspend fun removeWatchedEpisode(@Query ("user_id") userId: Long, @Query ("series_id") seriesId: Long, @Query ("season") season: Long, @Query ("episode") episode: Long)
 }
