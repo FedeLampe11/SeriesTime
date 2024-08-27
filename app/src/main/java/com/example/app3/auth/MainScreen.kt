@@ -42,7 +42,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.app3.DestinationScreen
-import com.example.app3.FbViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
@@ -75,7 +74,7 @@ fun VideoBackground(uri: Uri) {
 }
 
 @Composable
-fun MainScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
+fun MainScreen(navController: NavController, currUser: SharedPreferences) {
 
     val context = LocalContext.current
 
@@ -147,7 +146,6 @@ fun MainScreen(navController: NavController, vm: FbViewModel, currUser: SharedPr
                     .size(300.dp)
                     .clickable {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            //Log.d("LOG", "Value: $hasNotificationPermission")
                             launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                         if (currUser.getLong("id", -1L) != -1L)

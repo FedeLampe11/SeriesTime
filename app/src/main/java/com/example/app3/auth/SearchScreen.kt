@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,12 +53,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
-import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
 import com.example.app3.RecommenderViewModel
 import com.example.app3.ui.theme.darkBlue
@@ -65,22 +66,26 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 
-
-// TODO: add the older researches by not deleting it every time we refresh the page
-// TODO: add the suggested for you series below the searchbar
+// TODO: capire se mettere qua la chiamata al recommender o no
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, recommenderVM: RecommenderViewModel) {
+
+    val context = LocalContext.current
 
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
 
     var alreadySearched by remember { mutableStateOf(false) }
 
-    val history = remember { mutableStateListOf<String>() }
+    val searchHistory: SharedPreferences = context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
+    val history = remember {
+        mutableStateListOf<String>().apply {
+            addAll(searchHistory.getStringSet("history", emptySet())!!.toList())
+        }
+    }
 
     val viewState = apiViewModel.searchState.value
-
     val recommenderState = recommenderVM.recommenderState.value
 
     var toggle = false
@@ -101,8 +106,10 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                     }
                 history.add(0, text)
                 active = false
-                // start fetching data
-                apiViewModel.fetchSearch(text)
+                searchHistory.edit {
+                    putStringSet("history", history.toSet())
+                }
+                apiViewModel.fetchSearch(text)  // start fetching data
                 toggle = true
                 if (!alreadySearched) alreadySearched = true
             },
@@ -177,6 +184,9 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                     IconButton(
                         onClick = {
                             history.remove(it)
+                            searchHistory.edit {
+                                putStringSet("history", history.toSet())
+                            }
                         }) {
                         Icon(Icons.Default.Close, contentDescription = "Clear Search", tint = Color.LightGray)
                     }
@@ -272,7 +282,7 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController, viewModel: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
+fun SearchScreen(navController: NavController, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
 
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())

@@ -200,7 +200,7 @@ fun CarouselItem(detail: Details, navController: NavController) {
 }
 
 @Composable
-fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, recommenderVM: RecommenderViewModel){
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, recommenderVM: RecommenderViewModel){
 
     val recommenderState = recommenderVM.recommenderState.value
 
@@ -290,7 +290,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, apiV
                 .padding(start = 40.dp)
                 .padding(vertical = 15.dp)
         )
-        // TODO: check recommender system suggestions
+        // TODO: capire se mettere la chiamata al recommender nella pagina (aggiorna ogni volta) o nella main activity
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -488,6 +488,6 @@ fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: Share
             }
         }
     ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, apiViewModel, viewState, vm, currUser, recommenderVM)
+        innerPadding -> SeriesScreen(innerPadding, navController, viewState, vm, currUser, recommenderVM)
     }
 }

@@ -3,7 +3,6 @@ package com.example.app3.auth
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
@@ -81,6 +80,8 @@ import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
+// TODO: add tracking logic (button and logic)
+
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -137,7 +138,6 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
                 }
             }
             if (mutableList.contains(ep)) {
-            //if (seenEpisodes.contains(ep)) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = "Episode already seen",
@@ -174,7 +174,6 @@ fun EpisodeRow(episode: Episode, seriesId: String, userId: Long, vm: FbViewModel
             }
         } else {
             if (!mutableList.contains(ep)) {
-            //if (!seenEpisodes.contains(ep)) {
                 Box(
                     modifier = Modifier.weight(0.8f)
                 ) {
@@ -353,7 +352,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            item { // Static part
+            item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -439,7 +438,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = (obj.description?.replace("<br>", "\n")?.replace("<b>", "")?.replace("<br>", "")) + "",
+                        text = (obj.description?.replace(Regex("<[^>]*>"), "")) + "",
                         fontSize = 18.sp,
                         fontFamily = inter_font,
                         fontWeight = FontWeight.Normal,

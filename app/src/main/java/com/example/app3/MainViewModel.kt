@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class MainViewModel: ViewModel() {
-    private val _serieState = mutableStateOf(ReplyState())
-    val seriesState: State<ReplyState> = _serieState
+    private val _seriesState = mutableStateOf(ReplyState())
+    val seriesState: State<ReplyState> = _seriesState
 
     private val _detailState = mutableStateOf(DetailState())
     val detailState: State<DetailState> = _detailState
@@ -24,13 +24,13 @@ class MainViewModel: ViewModel() {
         viewModelScope.launch{
             try{
                 val response = userService.getMostPopular()
-                _serieState.value = _serieState.value.copy(
+                _seriesState.value = _seriesState.value.copy(
                     obj = response,
                     loading = false,
                     error = null
                 )
             } catch (e: Exception) {
-                _serieState.value = _serieState.value.copy(
+                _seriesState.value = _seriesState.value.copy(
                     loading = false,
                     error = "Error fetching most popular series ${e.message}"
                 )

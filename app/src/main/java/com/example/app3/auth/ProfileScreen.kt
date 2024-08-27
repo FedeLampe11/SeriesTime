@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,15 +58,12 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
-import com.example.app3.FbViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 import com.example.app3.ui.theme.switch_colors
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 @SuppressLint("WorldReadableFiles")
 @Composable
@@ -230,6 +226,29 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
         }
 
         Button(
+            onClick = { navController.navigate(DestinationScreen.Statistics.route) },
+            colors = ButtonColors(
+                containerColor = ourRed,
+                contentColor = Color.White,
+                disabledContainerColor = ourRed,
+                disabledContentColor = Color.White
+            ),
+            modifier = Modifier.padding(top = 15.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_format_list_numbered_24),
+                contentDescription = "Go to statistics page",
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Text(
+                text = "Statistics",
+                fontFamily = inter_font,
+            )
+        }
+
+        Button(
             onClick = {
                 val edit = currUser.edit()
                 edit.putLong("id", -1L)
@@ -265,7 +284,7 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
+fun ProfileScreen(navController: NavController, currUser: SharedPreferences, listVM: MyListViewModel) {
 
     val name = currUser.getString("name", "")
     val photoUrl = currUser.getString("picture", "")

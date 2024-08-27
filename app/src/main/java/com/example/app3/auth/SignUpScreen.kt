@@ -52,7 +52,7 @@ import com.example.app3.ui.theme.ourRed
 
 @Composable
 fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
-    val emty by remember { mutableStateOf("") }
+    val empty by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -64,7 +64,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
     var errorP by remember { mutableStateOf(false) }
     var errorCP by remember { mutableStateOf(false) }
     var errorC by remember { mutableStateOf(false) }
-    var pLenght by remember { mutableStateOf(false) }
+    var pLength by remember { mutableStateOf(false) }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,7 +121,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_close_24),
                         contentDescription = null,
-                        Modifier.clickable { name = emty }
+                        Modifier.clickable { name = empty }
                     )
             },
             keyboardOptions = KeyboardOptions(
@@ -187,7 +187,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_close_24),
                         contentDescription = null,
-                        Modifier.clickable { email = emty }
+                        Modifier.clickable { email = empty }
                     )
             },
             keyboardOptions = KeyboardOptions(
@@ -228,7 +228,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
                 textAlign = TextAlign.Center,
             )
         }
-        if (pLenght) {
+        if (pLength) {
             Text(
                 text = "Password must be 6 chars",
                 color = Color.Red,
@@ -239,7 +239,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
             value = password,
             onValueChange = {
                 password = it
-                pLenght = it.length < 6
+                pLength = it.length < 6
             },
             placeholder = {
                 Text(

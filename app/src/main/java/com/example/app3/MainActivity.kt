@@ -28,6 +28,7 @@ import com.example.app3.auth.NotificationScreen
 import com.example.app3.auth.ProfileScreen
 import com.example.app3.auth.SearchScreen
 import com.example.app3.auth.SignUpScreen
+import com.example.app3.auth.StatisticsScreen
 import com.example.app3.auth.SuccessScreen
 import com.example.app3.auth.createNotificationChannel
 import com.example.app3.main.NotificationMessage
@@ -76,6 +77,7 @@ sealed class DestinationScreen(val route: String) {
     }
     object Search: DestinationScreen("search")
     object Notification: DestinationScreen("notification")
+    object Statistics: DestinationScreen("statistics")
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -110,7 +112,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
 
     NavHost(navController = navController, startDestination = startPage) {
         composable(DestinationScreen.Main.route) {
-            MainScreen(navController, vm, currUser)
+            MainScreen(navController, currUser)
         }
         composable(DestinationScreen.SignUp.route) {
             SignUpScreen(navController, vm, currUser)
@@ -125,7 +127,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             FavouriteScreen(navController, vm, currUser, listVM)
         }
         composable(DestinationScreen.Profile.route) {
-            ProfileScreen(navController, vm, currUser, listVM)
+            ProfileScreen(navController, currUser, listVM)
         }
         composable(DestinationScreen.Detail.route) { backStackEntry ->
             val seriesId = backStackEntry.arguments?.getString("seriesId")
@@ -134,10 +136,13 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             }
         }
         composable(DestinationScreen.Search.route) {
-            SearchScreen(navController, vm, currUser, listVM, recommenderVM)
+            SearchScreen(navController, currUser, listVM, recommenderVM)
         }
         composable(DestinationScreen.Notification.route) {
             NotificationScreen(navController, vm, currUser, listVM)
+        }
+        composable(DestinationScreen.Statistics.route) {
+            StatisticsScreen(navController, vm, currUser)
         }
     }
 }
