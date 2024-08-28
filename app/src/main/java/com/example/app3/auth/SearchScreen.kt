@@ -66,7 +66,6 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 
-// TODO: capire se mettere qua la chiamata al recommender o no
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, apiViewModel: MainViewModel, recommenderVM: RecommenderViewModel) {
@@ -214,10 +213,9 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                     }
 
                     else -> {
-                        LazyHorizontalGrid(
-                            GridCells.Fixed(1),
-                            modifier = Modifier
-                                .height(250.dp)
+                        LazyVerticalGrid(
+                            GridCells.Fixed(2),
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             items(recommenderState.list) { series ->
                                 SeriesItem(series, showName = true, navController)

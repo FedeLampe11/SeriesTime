@@ -45,6 +45,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -332,7 +333,9 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
 
     val favorite = remember { mutableStateOf(vm.favoriteState.value.list.contains(obj)) }
 
-    vm.getWatched(userId, obj.id.toLong())
+    LaunchedEffect(userId) {
+        vm.getWatched(userId, obj.id.toLong())
+    }
 
     if (vm.watchedState.value.loading){
         Box (
@@ -438,7 +441,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = (obj.description?.replace(Regex("<[^>]*>"), "")) + "",
+                        text = (obj.description?.replace("<br>", "\n")?.replace(Regex("<[^>]*>"), "")) + "",
                         fontSize = 18.sp,
                         fontFamily = inter_font,
                         fontWeight = FontWeight.Normal,

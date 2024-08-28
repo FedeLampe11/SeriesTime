@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -274,10 +275,13 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
-
+    val userId = currUser.getLong("id", -1L)
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    vm.getFavorites(currUser.getLong("id", -1L))
+
+    LaunchedEffect(userId) {
+        vm.getFavorites(userId)
+    }
 
     Scaffold (
         modifier = Modifier

@@ -212,7 +212,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
             .padding(innerPadding)
     ){
         Text(
-            text = "Welcome\n ${currUser.getString("name", "Bomber")}",
+            text = "Welcome\n ${currUser.getString("name", "to SeriesTime")}",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 15.dp),
@@ -310,7 +310,6 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
                 }
 
                 else -> {
-                    Log.d("REC", "${recommenderState.list[0]}")
                     LazyHorizontalGrid(
                         GridCells.Fixed(1),
                         modifier = Modifier
@@ -373,17 +372,18 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuccessScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
+fun SuccessScreen(navController: NavController,apiViewModel: MainViewModel, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
 
     val userId = currUser.getLong("id", -1L)
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    val apiViewModel: MainViewModel = viewModel()
     val viewState by apiViewModel.seriesState
-    vm.getFavorites(userId)
 
-    recommenderVM.getRecommended(userId)
+    LaunchedEffect(userId) {
+        vm.getFavorites(userId)
+        recommenderVM.getRecommended(userId)
+    }
 
     Scaffold (
         modifier = Modifier
