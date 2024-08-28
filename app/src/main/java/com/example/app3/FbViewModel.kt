@@ -37,7 +37,7 @@ class FbViewModel @Inject constructor(
     private val _removeWatchedState = mutableStateOf(ModifyWatchedState())
     val removeWatchedState: State<ModifyWatchedState> = _removeWatchedState
 
-    fun onSignUp(name: String, email: String, pass: String) {
+    fun onSignUp(name: String, email: String, pass: String, profilePicture: String?) {
         val body = mapOf(
             "id" to null,
             "full_name" to name,
@@ -45,7 +45,7 @@ class FbViewModel @Inject constructor(
             "password" to pass,
             "meta_api_key" to null,
             "google_api_key" to null,
-            "profile_picture" to null
+            "profile_picture" to profilePicture
         )
         inProgress.value = true
 

@@ -67,8 +67,8 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import java.time.LocalDateTime
 
+// ViewModel for notifications
 class MyListViewModel : ViewModel() {
-    // Create a stateful list inside the ViewModel
     val items: SnapshotStateList<Details> = mutableStateListOf()
 }
 
@@ -88,6 +88,8 @@ fun createNotificationChannel(context: Context) {
 @RequiresApi(Build.VERSION_CODES.O)
 fun sendNotification(context: Context, series: Details, listVM: MyListViewModel) {
     val preferences = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+    val trackedList = context.getSharedPreferences("tracked_list", Context.MODE_PRIVATE)
+    val isTracked = trackedList.getStringSet("tracked", emptySet())!!.toList().contains(series.id)
 
     val hour = preferences.getInt("NotificationHour", 9)
     val minute = preferences.getInt("NotificationMinute", 0)
@@ -100,7 +102,7 @@ fun sendNotification(context: Context, series: Details, listVM: MyListViewModel)
         java.time.Duration.between(currentTime, targetTime.plusDays(1)).toMillis()
     }
 
-    if (preferences.getBoolean("ReceiveNotifications", true)) {
+    if (preferences.getBoolean("ReceiveNotifications", true) && isTracked) {
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed({
             val notification = NotificationCompat.Builder(context, "Notifications")

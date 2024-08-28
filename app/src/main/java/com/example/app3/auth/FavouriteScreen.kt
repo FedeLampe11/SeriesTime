@@ -101,31 +101,32 @@ fun SeriesRow(details: Details, navController: NavController) {
                 style = TextStyle(fontWeight = FontWeight.Bold),
             )
 
-            val startDate = details.startDate?.take(4) + ""
-            Text(
-                text = startDate,
-                color = Color.White,
-                fontFamily = inter_font,
-                fontSize = 14.sp,
-                style = TextStyle(fontWeight = FontWeight.Normal),
-            )
-
-            if (countdown != null) {
+            if (!details.episodes.isNullOrEmpty()) {
+                val startDate = details.startDate?.take(4) + ""
                 Text(
-                    text = "New Ep. airs on $countdown",
+                    text = startDate,
                     color = Color.White,
                     fontFamily = inter_font,
                     fontSize = 14.sp,
-                    lineHeight = 16.sp
+                    style = TextStyle(fontWeight = FontWeight.Normal),
+                )
+
+                if (countdown != null) {
+                    Text(
+                        text = "New Ep. airs on $countdown",
+                        color = Color.White,
+                        fontFamily = inter_font,
+                        fontSize = 14.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+                Text(
+                    text = "${details.episodes.last().season} seasons · ${details.status} · ${details.network}",
+                    color = Color.White,
+                    fontFamily = inter_font,
+                    fontSize = 14.sp,
                 )
             }
-
-            Text(
-                text = "${details.episodes?.last()?.season} seasons · ${details.status} · ${details.network}",
-                color = Color.White,
-                fontFamily = inter_font,
-                fontSize = 14.sp,
-            )
         }
     }
 }

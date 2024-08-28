@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -125,11 +126,11 @@ fun MainScreen(navController: NavController, currUser: SharedPreferences) {
             )
 
             Spacer(modifier = Modifier.height(420.dp))
-
+            // TODO: sistema il testo e la freccina
             Text(
                 text = annotatedText,
                 style = TextStyle(
-                    fontSize = 60.sp,
+                    fontSize = 55.sp,
                     lineHeight = 53.sp,
                     fontFamily = inter_font,
                     fontWeight = FontWeight(1000),
@@ -141,9 +142,9 @@ fun MainScreen(navController: NavController, currUser: SharedPreferences) {
             Image(
                 painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
                 contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 37.dp)
-                    .size(300.dp)
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 300.dp)
+                    .size(75.dp)
                     .clickable {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             launcher.launch(Manifest.permission.POST_NOTIFICATIONS)

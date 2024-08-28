@@ -62,6 +62,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -77,11 +78,61 @@ import com.example.app3.Episode
 import com.example.app3.EpisodeReply
 import com.example.app3.FbViewModel
 import com.example.app3.MainViewModel
+import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 
-// TODO: add tracking logic (button and logic)
+@Composable
+fun NotificationButton(details: Details) {
+    val context = LocalContext.current
+    val trackedList = context.getSharedPreferences("tracked_list", Context.MODE_PRIVATE)
+    val list = remember {
+        mutableStateListOf<String>().apply {
+            addAll(trackedList.getStringSet("tracked", emptySet())!!.toList())
+        }
+    }
+
+    var tracked by remember { mutableStateOf(list.toList().contains(details.id)) }
+
+    fun updateTrackedList(updatedList: Set<String>) {
+        with(trackedList.edit()) {
+            putStringSet("tracked", updatedList)
+            apply()
+        }
+    }
+
+    if (tracked) {
+        IconButton(
+            onClick = {
+                tracked = false
+                list.remove(details.id)
+                updateTrackedList(list.toSet())
+            },  // Remove sharedPreferences
+
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_notifications_active_24),
+                contentDescription = "Track button",
+                modifier = Modifier.size(40.dp)
+            )
+        }
+    } else {
+        IconButton(
+            onClick = {
+                tracked = true
+                list.add(details.id)
+                updateTrackedList(list.toSet())
+            },   // Add sharedPreferences
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_notifications_off_24),
+                contentDescription = "Track button",
+                modifier = Modifier.size(40.dp)
+            )
+        }
+    }
+}
 
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalFoundationApi::class)
@@ -333,6 +384,19 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
 
     val favorite = remember { mutableStateOf(vm.favoriteState.value.list.contains(obj)) }
 
+    val trackedList = LocalContext.current.getSharedPreferences("tracked_list", Context.MODE_PRIVATE)
+    val list = remember {
+        mutableStateListOf<String>().apply {
+            addAll(trackedList.getStringSet("tracked", emptySet())!!.toList())
+        }
+    }
+    fun updateTrackedList(updatedList: Set<String>) {
+        with(trackedList.edit()) {
+            putStringSet("tracked", updatedList)
+            apply()
+        }
+    }
+
     LaunchedEffect(userId) {
         vm.getWatched(userId, obj.id.toLong())
     }
@@ -417,8 +481,11 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                                 .clickable {
                                     vm.removeFavoriteSeries(userId, obj.id.toLong())
                                     favorite.value = !favorite.value
+                                    list.remove(obj.id)
+                                    updateTrackedList(list.toSet())
                                 }
                         )
+                        NotificationButton(obj)
                     } else {
                         Icon(
                             imageVector = Icons.Filled.FavoriteBorder,
@@ -429,6 +496,8 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                                 .clickable {
                                     vm.addFavoriteSeries(userId, obj.id.toLong())
                                     favorite.value = !favorite.value
+                                    list.add(obj.id)
+                                    updateTrackedList(list.toSet())
                                 }
                         )
                     }

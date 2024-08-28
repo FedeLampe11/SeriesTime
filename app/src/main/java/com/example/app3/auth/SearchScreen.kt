@@ -75,7 +75,7 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
 
     var alreadySearched by remember { mutableStateOf(false) }
 
-    val searchHistory: SharedPreferences = context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
+    val searchHistory = context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
     val history = remember {
         mutableStateListOf<String>().apply {
             addAll(searchHistory.getStringSet("history", emptySet())!!.toList())

@@ -1,5 +1,6 @@
 package com.example.app3.auth
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -68,6 +69,8 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 import kotlinx.coroutines.delay
+
+// TODO: sistemare richieste al server che sono troppe e danno problemi
 
 @Composable
 fun IndicatorDots(size: Int, currentIndex: Int) {
@@ -199,6 +202,7 @@ fun CarouselItem(detail: Details, navController: NavController) {
 
 @Composable
 fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, recommenderVM: RecommenderViewModel){
+    val context = LocalContext.current
 
     val recommenderState = recommenderVM.recommenderState.value
 
@@ -238,6 +242,17 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
         )
 
         if (vm.favoriteState.value.list.isNotEmpty()) {
+            val sharedPreferences = context.getSharedPreferences("tracked_list", Context.MODE_PRIVATE)
+            val trackedList = sharedPreferences.getStringSet("tracked", emptySet())!!.toList()
+            if (trackedList.isEmpty()) {
+                val favoriteIds = vm.favoriteState.value.list.map { it.id }.toSet()
+
+                with(sharedPreferences.edit()) {
+                    putStringSet("tracked", favoriteIds)
+                    apply()
+                }
+
+            }
             LazyHorizontalGrid(
                 GridCells.Fixed(1),
                 modifier = Modifier

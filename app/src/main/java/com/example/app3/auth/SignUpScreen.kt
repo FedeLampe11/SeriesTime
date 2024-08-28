@@ -1,6 +1,16 @@
 package com.example.app3.auth
 
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,8 +22,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +43,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -49,6 +67,136 @@ import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
+
+fun uploadImageToFirebase(
+    bitmap: Bitmap,
+    callback: (Boolean, String) -> Unit
+) {
+    val storageRef = Firebase.storage.reference
+    val imageRef = storageRef.child("images/${bitmap}")
+
+    val baos = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+    val imageData = baos.toByteArray()
+
+    imageRef.putBytes(imageData).addOnSuccessListener {
+        imageRef.downloadUrl.addOnSuccessListener {uri ->
+            val imageUrl = uri.toString()
+            callback(true, imageUrl)
+        }.addOnFailureListener{
+            callback(false, null.toString())
+        }
+    }.addOnFailureListener{
+        callback(false, null.toString())
+    }
+}
+
+@Composable
+fun ImageInsertionButton(bitmap: Bitmap?, launcher: ManagedActivityResultLauncher<String, Uri?>, cLauncher: ManagedActivityResultLauncher<Void?, Bitmap?>) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(150.dp)
+                    .clickable { showDialog = true }
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_person_24),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Color.LightGray),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.DarkGray)
+                    .size(150.dp)
+                    .clickable { showDialog = true }
+            )
+        }
+    }
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 10.dp)
+    ) {
+        if (showDialog) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .padding(10.dp)
+                    .width(300.dp)
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.DarkGray)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(start = 53.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_camera_alt_24),
+                        contentDescription = "Open Camera",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clickable {
+                                cLauncher.launch()
+                                showDialog = false
+                            }
+                    )
+                    Text(
+                        text = "Camera",
+                        color = Color.White,
+                        fontFamily = inter_font
+                    )
+                }
+                Spacer(modifier = Modifier.padding(30.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ){
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_image_24),
+                        contentDescription = "Open Gallery",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clickable { launcher.launch("image/*") }
+                    )
+                    Text(
+                        text = "Gallery",
+                        color = Color.White,
+                        fontFamily = inter_font
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(start = 35.dp, bottom = 75.dp)
+                ) {
+                    Text(
+                        text = "x",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        modifier = Modifier
+                            .clickable { showDialog = false }
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences) {
@@ -65,6 +213,30 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
     var errorCP by remember { mutableStateOf(false) }
     var errorC by remember { mutableStateOf(false) }
     var pLength by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val isUploading = remember { mutableStateOf(false) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var imgUrl by remember { mutableStateOf("") }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            bitmap = if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            } else {
+                val source = ImageDecoder.createSource(context.contentResolver, it)
+                ImageDecoder.decodeBitmap(source)
+            }
+        }
+    }
+
+    val cLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) {
+        bitmap = it
+    }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -86,6 +258,10 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
         )
 
         Spacer(modifier = Modifier.height(30.dp))
+
+        ImageInsertionButton(bitmap, launcher, cLauncher)
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (errorN) {
             Text(
@@ -117,7 +293,7 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
                 )
             },
             trailingIcon = {
-                if (email.isNotEmpty())
+                if (name.isNotEmpty())
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_close_24),
                         contentDescription = null,
@@ -412,7 +588,23 @@ fun SignUpScreen(navController: NavController, vm: FbViewModel, currUser: Shared
                                 errorC = false
                                 if (password == cpassword) {
                                     errorCP = false
-                                    vm.onSignUp(name, email, password)
+                                    isUploading.value = true
+                                    bitmap.let{bitmap->
+                                        if(bitmap!=null){
+                                            isUploading.value = false
+                                            uploadImageToFirebase(bitmap){ success, imageUrl ->
+                                                isUploading.value = false
+                                                if(success){
+                                                    imageUrl.let{
+                                                        imgUrl = it
+                                                        vm.onSignUp(name, email, password, imgUrl)
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            vm.onSignUp(name, email, password, null)
+                                        }
+                                    }
                                 } else {
                                     errorCP = true
                                 }
