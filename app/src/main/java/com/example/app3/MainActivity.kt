@@ -100,6 +100,8 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
         userEditor.apply()
     }
 
+    val apiViewModel: MainViewModel = viewModel()
+
     val listVM: MyListViewModel = viewModel()
 
     val recommenderVM : RecommenderViewModel = viewModel()
@@ -121,7 +123,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             LoginScreen(navController, vm, callbackManager, currUser)
         }
         composable(DestinationScreen.Home.route) {
-            SuccessScreen(navController, vm, currUser, listVM, recommenderVM)
+            SuccessScreen(navController, apiViewModel, vm, currUser, listVM, recommenderVM)
         }
         composable(DestinationScreen.Favourite.route) {
             FavouriteScreen(navController, vm, currUser, listVM)
