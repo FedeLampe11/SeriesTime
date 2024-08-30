@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -210,111 +211,178 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
+fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, isTablet: Boolean) {
 
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    Scaffold (
-        modifier = Modifier
-            .nestedScroll(scrollBehaviour.nestedScrollConnection)
-            .background(darkBlue),
-        topBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue)
-                    .padding(horizontal = 15.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = { navController.popBackStack() }
+    if (!isTablet) {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehaviour.nestedScrollConnection)
+                .background(darkBlue),
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue)
+                        .padding(horizontal = 15.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        tint = Color.White,
-                        contentDescription = "Go back to last page"
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        listVM.items.clear()
+                    IconButton(
+                        onClick = { navController.popBackStack() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            tint = Color.White,
+                            contentDescription = "Go back to last page"
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Clear,
-                        tint = if(listVM.items.isNotEmpty()) ourRed else Color.LightGray,
-                        contentDescription = "Remove every notification"
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue)
-                    .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-
-                ){
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Search.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Search,
-                        tint = ourRed,
-                        contentDescription = "Go to search page"
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Favourite.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Favorite,
-                        tint = ourRed,
-                        contentDescription = "Go to favourite page"
-                    )
-                }
-
-                if (photoUrl != null && photoUrl != "")
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(photoUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clickable { navController.navigate(DestinationScreen.Profile.route) }
-                            .padding(horizontal = 11.dp)
-                            .size(25.dp)
-                            .clip(CircleShape)
-                    )
-                else
                     IconButton(
                         onClick = {
-                            navController.navigate(DestinationScreen.Profile.route)
+                            listVM.items.clear()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Clear,
+                            tint = if (listVM.items.isNotEmpty()) ourRed else Color.LightGray,
+                            contentDescription = "Remove every notification"
+                        )
+                    }
+                }
+            },
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue)
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Search.route)
                         }
                     ) {
                         Icon(
                             modifier = Modifier.size(25.dp),
-                            imageVector = Icons.Filled.AccountCircle,
+                            imageVector = Icons.Filled.Search,
                             tint = ourRed,
-                            contentDescription = "Account image"
+                            contentDescription = "Go to search page"
                         )
                     }
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Favourite.route)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.Favorite,
+                            tint = ourRed,
+                            contentDescription = "Go to favourite page"
+                        )
+                    }
+
+                    if (photoUrl != null && photoUrl != "")
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(photoUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clickable { navController.navigate(DestinationScreen.Profile.route) }
+                                .padding(horizontal = 11.dp)
+                                .size(25.dp)
+                                .clip(CircleShape)
+                        )
+                    else
+                        IconButton(
+                            onClick = {
+                                navController.navigate(DestinationScreen.Profile.route)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(25.dp),
+                                imageVector = Icons.Filled.AccountCircle,
+                                tint = ourRed,
+                                contentDescription = "Account image"
+                            )
+                        }
+                }
+            }
+        ) { innerPadding ->
+            NotificationPage(innerPadding, navController, listVM, vm)
+        }
+    } else {
+        Row (
+            modifier = Modifier.fillMaxSize()
+        ){
+            LeftMenu(DestinationScreen.Notification, navController, photoUrl, listVM)
+            TNotScreen(navController, listVM, vm)
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun TNotScreen(navController: NavController, listVM: MyListViewModel, vm: FbViewModel) {
+    val context = LocalContext.current
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (listVM.items.isNotEmpty()) {
+            items(listVM.items){
+                    details -> NotificationRow(details, navController, listVM)
+            }
+            item {
+                IconButton(
+                    onClick = { listVM.items.clear() },
+                    colors = IconButtonColors(
+                        containerColor = ourRed,
+                        contentColor = Color.White,
+                        disabledContainerColor = ourRed,
+                        disabledContentColor = Color.White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Clear,
+                        contentDescription = "Clear all",
+                        tint = Color.White
+                    )
+                }
+            }
+        } else {
+            item {
+                Column (
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 50.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        text = "Nothing to show here!",
+                        color = Color.White,
+                        fontFamily = inter_font,
+                        fontSize = 20.sp,
+                        style = TextStyle(fontWeight = FontWeight.Normal),
+                        modifier = Modifier.clickable {
+                            // Only for demonstration purposes
+                            sendNotification(context, vm.favoriteState.value.list[0], listVM)
+                        }
+                    )
+                }
             }
         }
-    ) {
-            innerPadding -> NotificationPage(innerPadding, navController, listVM, vm)
     }
 }

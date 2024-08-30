@@ -133,6 +133,10 @@ class FbViewModel @Inject constructor(
         }
     }
 
+    fun clearError(){
+        _userState.value = _userState.value.copy(error = null)
+    }
+
     fun getFavorites(userId: Long) {
         viewModelScope.launch{
             try{
@@ -263,7 +267,7 @@ class FbViewModel @Inject constructor(
     data class UserReplyState(
         val loading: Boolean = true,
         val obj: UserAuthReply = UserAuthReply(-1, "", "", "", "", "", ""),
-        val error: String? = null
+        var error: String? = null
     )
 
     data class ProfilePictureState(

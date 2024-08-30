@@ -71,6 +71,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.storage.storage
 import java.io.ByteArrayOutputStream
 
+// TODO: change graphics on tablet?
 fun uploadImageToFirebase(
     bitmap: Bitmap,
     callback: (Boolean, String) -> Unit

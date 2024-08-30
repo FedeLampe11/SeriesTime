@@ -28,7 +28,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -79,6 +81,54 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+// TODO: check errorDialog on phone
+// TODO: change graphics on tablet?
+@Composable
+fun ErrorDialog(
+    errorMessage: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "ERROR",
+                color = Color.Red,
+                fontWeight = FontWeight(700),
+                fontSize = 26.sp,
+                fontFamily = inter_font,
+            )
+        },
+        text = {
+            Text(
+                text = errorMessage,
+                color = Color.White,
+                fontSize = 24.sp,
+                fontFamily = inter_font,
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonColors(
+                    containerColor = ourRed,
+                    contentColor = Color.White,
+                    disabledContainerColor = ourRed,
+                    disabledContentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "OK",
+                    color = Color.White,
+                    fontWeight = FontWeight(700),
+                    fontSize = 26.sp,
+                    fontFamily = inter_font,
+                )
+            }
+        },
+        containerColor = darkBlue,
+    )
+}
 
 @Composable
 fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: CallbackManager, currUser: SharedPreferences) {
@@ -312,6 +362,12 @@ fun LoginScreen(navController: NavController, vm: FbViewModel, callbackManager: 
                 navController.navigate(DestinationScreen.Home.route)
             }
             vm.signedIn.value = false
+            if (vm.userState.value.error != "" && vm.userState.value.error != null) {
+                ErrorDialog(
+                    errorMessage = "Email or Password are wrong!",
+                    onDismiss = { vm.clearError() }
+                )
+            }
         }
         Spacer(modifier = Modifier.height(15.dp))
         Row (

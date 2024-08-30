@@ -31,6 +31,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -150,6 +152,7 @@ fun AZSortButton(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            modifier = Modifier.background(Color.DarkGray)
         ){
             orderingType.forEach { order ->
                 DropdownMenuItem(
@@ -165,7 +168,9 @@ fun AZSortButton(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
-                    })
+                    },
+
+                )
             }
         }
     }
@@ -278,7 +283,7 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel) {
+fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, isTablet: Boolean) {
     val userId = currUser.getLong("id", -1L)
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -288,107 +293,233 @@ fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: Sh
         vm.getFavorites(userId)
     }
 
-    Scaffold (
-        modifier = Modifier
-            .nestedScroll(scrollBehaviour.nestedScrollConnection)
-            .background(darkBlue),
-        topBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "SERIES\nTIME",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        lineHeight = 24.sp,
-                        fontFamily = inter_font,
-                        fontWeight = FontWeight(700),
-                        color = Color.White,
-                    ),
+    if (!isTablet) {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehaviour.nestedScrollConnection)
+                .background(darkBlue),
+            topBar = {
+                Row(
                     modifier = Modifier
-                        .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
-                        .clickable { navController.navigate(DestinationScreen.Home.route) }
-                )
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Notification.route)
-                    }
+                        .fillMaxWidth()
+                        .background(darkBlue),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Notifications,
-                        tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
-                        contentDescription = "Go to notification page"
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue)
-                    .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-
-                ){
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Search.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Search,
-                        tint = ourRed,
-                        contentDescription = "Go to search page"
-                    )
-                }
-
-                IconButton(
-                    onClick = { /* Do Nothing*/ }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Favorite,
-                        tint = ourRed,
-                        contentDescription = "Go to favourite page"
-                    )
-                }
-
-                if (photoUrl != null && photoUrl != "")
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(photoUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = null,
+                    Text(
+                        text = "SERIES\nTIME",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            lineHeight = 24.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight(700),
+                            color = Color.White,
+                        ),
                         modifier = Modifier
-                            .clickable { navController.navigate(DestinationScreen.Profile.route) }
-                            .padding(horizontal = 11.dp)
-                            .size(25.dp)
-                            .clip(CircleShape)
+                            .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                            .clickable { navController.navigate(DestinationScreen.Home.route) }
                     )
-                else
                     IconButton(
                         onClick = {
-                            navController.navigate(DestinationScreen.Profile.route)
+                            navController.navigate(DestinationScreen.Notification.route)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
+                            contentDescription = "Go to notification page"
+                        )
+                    }
+                }
+            },
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue)
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Search.route)
                         }
                     ) {
                         Icon(
                             modifier = Modifier.size(25.dp),
-                            imageVector = Icons.Filled.AccountCircle,
+                            imageVector = Icons.Filled.Search,
                             tint = ourRed,
-                            contentDescription = "Localized description"
+                            contentDescription = "Go to search page"
                         )
                     }
+
+                    IconButton(
+                        onClick = { /* Do Nothing*/ }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.Favorite,
+                            tint = ourRed,
+                            contentDescription = "Go to favourite page"
+                        )
+                    }
+
+                    if (photoUrl != null && photoUrl != "")
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(photoUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clickable { navController.navigate(DestinationScreen.Profile.route) }
+                                .padding(horizontal = 11.dp)
+                                .size(25.dp)
+                                .clip(CircleShape)
+                        )
+                    else
+                        IconButton(
+                            onClick = {
+                                navController.navigate(DestinationScreen.Profile.route)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(25.dp),
+                                imageVector = Icons.Filled.AccountCircle,
+                                tint = ourRed,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                }
+            }
+        ) { innerPadding ->
+            ScrollFavouritePage(innerPadding, navController, vm)
+        }
+    } else {
+        Row (
+            modifier = Modifier.fillMaxSize()
+        ){
+            LeftMenu(currentPage = DestinationScreen.Favourite, navController, photoUrl, listVM)
+            TFavouritePage(navController, vm)
+        }
+    }
+}
+
+@Composable
+fun TFavouritePage(navController: NavController, vm: FbViewModel) {
+    val favList = vm.favoriteState.value.list
+
+    val orderingType : MutableList<String> = mutableListOf("Addition Date", "Start Date", "Title")
+    var selectedText by remember { mutableStateOf(orderingType[0]) }
+
+    val sortedList by remember (selectedText) {
+        mutableStateOf(
+            when (selectedText) {
+                "Start Date" -> favList.sortedBy{ it.startDate }.reversed()
+                "Title" -> favList.sortedBy{ it.name }
+                else -> favList
+            }
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(15.dp))
+            Text(
+                text = "Favorite Series",
+                color = ourRed,
+                fontFamily = inter_font,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
+                textAlign = TextAlign.Start,
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Spacer(modifier = Modifier.height(15.dp))
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 1.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                AZSortButton(
+                    orderingType = orderingType,
+                    onOrderSelected = { selectedText = it }
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+            }
+
+
+            Spacer(modifier = Modifier.height(15.dp))
+            if (vm.favoriteState.value.loading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = ourRed)
+                }
+            } else {
+                if (favList.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(sortedList) {
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                SeriesRow(it, navController)
+                            }
+                        }
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Seems like you don't like any series, go check some to add!",
+                            color = ourRed,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(horizontal = 30.dp)
+                                .padding(vertical = 20.dp)
+                        )
+                        IconButton(
+                            onClick = {
+                                navController.navigate(DestinationScreen.Search.route)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(40.dp),
+                                imageVector = Icons.Filled.Search,
+                                tint = Color.White,
+                                contentDescription = "Go to search page"
+                            )
+                        }
+                    }
+                }
             }
         }
-    ) {
-        innerPadding -> ScrollFavouritePage(innerPadding, navController, vm)
     }
 }

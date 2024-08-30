@@ -379,7 +379,7 @@ fun SeasonDropDownMenu(details: Details, userId: Long, vm: FbViewModel){
 }
 
 @Composable
-fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences) {
+fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences, navController: NavController, isTablet: Boolean) {
     val userId = currUser.getLong("id", -1L)
 
     val favorite = remember { mutableStateOf(vm.favoriteState.value.list.contains(obj)) }
@@ -419,6 +419,28 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
+            if (isTablet){
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Black),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        IconButton(
+                            modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp),
+                            onClick = { navController.popBackStack() }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                tint = Color.White,
+                                contentDescription = "Go back to last page"
+                            )
+                        }
+                    }
+                }
+            }
             item {
                 Row(
                     modifier = Modifier
@@ -469,6 +491,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                         fontFamily = inter_font,
                         fontWeight = FontWeight.Bold,
                         color = ourRed,
+                        modifier = Modifier.weight(1.0f)
                     )
 
                     if (favorite.value) {
@@ -477,6 +500,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                             contentDescription = "Favorite button",
                             tint = ourRed,
                             modifier = Modifier
+                                .weight(0.2f)
                                 .size(40.dp)
                                 .clickable {
                                     vm.removeFavoriteSeries(userId, obj.id.toLong())
@@ -492,6 +516,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                             contentDescription = "Favorite button",
                             tint = ourRed,
                             modifier = Modifier
+                                .weight(1.0f)
                                 .size(40.dp)
                                 .clickable {
                                     vm.addFavoriteSeries(userId, obj.id.toLong())
@@ -502,11 +527,11 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
                         )
                     }
                 }
-
+                val padding = if(isTablet) 30.dp else 20.dp
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 30.dp, horizontal = 20.dp),
+                        .padding(vertical = 30.dp, horizontal = padding),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -542,7 +567,7 @@ fun ScrollDetailPage(obj: Details, vm: FbViewModel, currUser: SharedPreferences)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String, currUser: SharedPreferences) {
+fun DetailScreen(navController: NavController, vm: FbViewModel, listVM: MyListViewModel, seriesId: String, currUser: SharedPreferences, isTablet: Boolean) {
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -550,101 +575,137 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String
     apiViewModel.fetchDetailPage(seriesId)
     val viewState by apiViewModel.detailState
 
-    Scaffold (
-        modifier = Modifier
-            .nestedScroll(scrollBehaviour.nestedScrollConnection)
-            .background(darkBlue),
-        topBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                IconButton(
-                    modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp),
-                    onClick = { navController.popBackStack() }
+    if (!isTablet) {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehaviour.nestedScrollConnection)
+                .background(darkBlue),
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        tint = Color.White,
-                        contentDescription = "Go back to last page"
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue)
-                    .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-
-                ){
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Search.route)
+                    IconButton(
+                        modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 5.dp),
+                        onClick = { navController.popBackStack() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            tint = Color.White,
+                            contentDescription = "Go back to last page"
+                        )
                     }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Search,
-                        tint = ourRed,
-                        contentDescription = "Go to search page"
-                    )
                 }
+            },
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue)
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
 
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Favourite.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Favorite,
-                        tint = ourRed,
-                        contentDescription = "Go to favourite page"
-                    )
-                }
-
-                if (photoUrl != null && photoUrl != "")
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(photoUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clickable { navController.navigate(DestinationScreen.Profile.route) }
-                            .padding(horizontal = 11.dp)
-                            .size(25.dp)
-                            .clip(CircleShape)
-                    )
-                else
+                    ) {
                     IconButton(
                         onClick = {
-                            navController.navigate(DestinationScreen.Profile.route)
+                            navController.navigate(DestinationScreen.Search.route)
                         }
                     ) {
                         Icon(
                             modifier = Modifier.size(25.dp),
-                            imageVector = Icons.Filled.AccountCircle,
+                            imageVector = Icons.Filled.Search,
                             tint = ourRed,
-                            contentDescription = "Localized description"
+                            contentDescription = "Go to search page"
                         )
                     }
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Favourite.route)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.Favorite,
+                            tint = ourRed,
+                            contentDescription = "Go to favourite page"
+                        )
+                    }
+
+                    if (photoUrl != null && photoUrl != "")
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(photoUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clickable { navController.navigate(DestinationScreen.Profile.route) }
+                                .padding(horizontal = 11.dp)
+                                .size(25.dp)
+                                .clip(CircleShape)
+                        )
+                    else
+                        IconButton(
+                            onClick = {
+                                navController.navigate(DestinationScreen.Profile.route)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(25.dp),
+                                imageVector = Icons.Filled.AccountCircle,
+                                tint = ourRed,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                when {
+                    viewState.loading -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .padding(top = 15.dp),
+                                color = ourRed,
+                            )
+                        }
+                    }
+
+                    viewState.error != null -> {
+                        //Text(text = "Error occurred!")
+                        Text(
+                            text = "${viewState.error}" + "",
+                            color = Color.White
+                        )
+                    }
+
+                    else -> {
+                        ScrollDetailPage(viewState.obj, vm, currUser, navController, false)
+                    }
+                }
             }
         }
-    ) {
-        innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
+    } else {
+        Row (
+            modifier = Modifier.fillMaxSize()
+        ){
+            LeftMenu(currentPage = DestinationScreen.Detail, navController, photoUrl, listVM)
             when {
                 viewState.loading -> {
                     Column(
@@ -653,7 +714,7 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String
                             .background(Color.Black),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
-                    ){
+                    ) {
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .padding(top = 15.dp),
@@ -664,12 +725,14 @@ fun DetailScreen(navController: NavController, vm: FbViewModel, seriesId: String
 
                 viewState.error != null -> {
                     //Text(text = "Error occurred!")
-                    Text(text = "${viewState.error}" + "",
-                        color = Color.White)
+                    Text(
+                        text = "${viewState.error}" + "",
+                        color = Color.White
+                    )
                 }
 
                 else -> {
-                    ScrollDetailPage(viewState.obj, vm, currUser)
+                    ScrollDetailPage(viewState.obj, vm, currUser, navController, true)
                 }
             }
         }

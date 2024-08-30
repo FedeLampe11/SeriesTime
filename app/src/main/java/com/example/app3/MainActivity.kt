@@ -1,9 +1,11 @@
 package com.example.app3
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -22,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.app3.auth.DetailScreen
 import com.example.app3.auth.FavouriteScreen
+import com.example.app3.auth.HomeScreen
 import com.example.app3.auth.LoginScreen
 import com.example.app3.auth.MainScreen
 import com.example.app3.auth.MyListViewModel
@@ -30,7 +33,6 @@ import com.example.app3.auth.ProfileScreen
 import com.example.app3.auth.SearchScreen
 import com.example.app3.auth.SignUpScreen
 import com.example.app3.auth.StatisticsScreen
-import com.example.app3.auth.SuccessScreen
 import com.example.app3.auth.createNotificationChannel
 import com.example.app3.main.NotificationMessage
 import com.example.app3.ui.theme.App3Theme
@@ -40,21 +42,32 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var callbackManager: CallbackManager
+    @SuppressLint("SourceLockedOrientationActivity")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel(this)
         callbackManager = CallbackManager.Factory.create()
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val screenWidthDp = displayMetrics.widthPixels / (displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+        val isTablet = if (screenWidthDp >= 600) true else false
+        requestedOrientation = if (isTablet) {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+
         setContent {
             window.statusBarColor = getColor(R.color.black)
             window.navigationBarColor = getColor(R.color.black)
             App3Theme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AuthenticationApp(callbackManager)
+                    AuthenticationApp(callbackManager, isTablet)
                 }
             }
         }
@@ -83,7 +96,7 @@ sealed class DestinationScreen(val route: String) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AuthenticationApp(callbackManager: CallbackManager) {
+fun AuthenticationApp(callbackManager: CallbackManager, isTablet: Boolean) {
     val vm = hiltViewModel<FbViewModel>()
     val navController =  rememberNavController()
 
@@ -116,37 +129,37 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
 
     NavHost(navController = navController, startDestination = startPage) {
         composable(DestinationScreen.Main.route) {
-            MainScreen(navController, currUser)
+            MainScreen(navController, currUser, isTablet)
         }
         composable(DestinationScreen.SignUp.route) {
-            SignUpScreen(navController, vm, currUser)
+            SignUpScreen(navController, vm, currUser, )
         }
         composable(DestinationScreen.Login.route) {
-            LoginScreen(navController, vm, callbackManager, currUser)
+            LoginScreen(navController, vm, callbackManager, currUser, )
         }
         composable(DestinationScreen.Home.route) {
-            SuccessScreen(navController, viewState, vm, currUser, listVM, recommenderVM)
+            HomeScreen(navController, viewState, vm, currUser, listVM, recommenderVM, isTablet)
         }
         composable(DestinationScreen.Favourite.route) {
-            FavouriteScreen(navController, vm, currUser, listVM)
+            FavouriteScreen(navController, vm, currUser, listVM, isTablet)
         }
         composable(DestinationScreen.Profile.route) {
-            ProfileScreen(navController, currUser, vm, listVM)
+            ProfileScreen(navController, currUser, vm, listVM, isTablet)
         }
         composable(DestinationScreen.Detail.route) { backStackEntry ->
             val seriesId = backStackEntry.arguments?.getString("seriesId")
             seriesId?.let {
-                DetailScreen(navController, vm, it, currUser)
+                DetailScreen(navController, vm, listVM, it, currUser, isTablet)
             }
         }
         composable(DestinationScreen.Search.route) {
-            SearchScreen(navController, currUser, listVM, recommenderVM)
+            SearchScreen(navController, currUser, listVM, recommenderVM, isTablet)
         }
         composable(DestinationScreen.Notification.route) {
-            NotificationScreen(navController, vm, currUser, listVM)
+            NotificationScreen(navController, vm, currUser, listVM, isTablet)
         }
         composable(DestinationScreen.Statistics.route) {
-            StatisticsScreen(navController, vm, currUser)
+            StatisticsScreen(navController, vm, listVM, currUser, isTablet)
         }
     }
 }

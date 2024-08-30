@@ -11,8 +11,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,7 +59,7 @@ val annotatedText = buildAnnotatedString {
 }
 
 @Composable
-fun VideoBackground(uri: Uri) {
+fun VideoBackground(uri: Uri, isTablet: Boolean) {
     val context = LocalContext.current
 
     AndroidView(
@@ -70,16 +72,20 @@ fun VideoBackground(uri: Uri) {
                 }
             }
         },
-        modifier = Modifier.fillMaxHeight()
+        modifier = if (!isTablet) Modifier.fillMaxHeight() else Modifier.fillMaxWidth()
     )
 }
 
 @Composable
-fun MainScreen(navController: NavController, currUser: SharedPreferences) {
+fun MainScreen(navController: NavController, currUser: SharedPreferences, isTablet: Boolean) {
 
     val context = LocalContext.current
 
-    val videoUri = Uri.parse("android.resource://${context.packageName}/${R.raw.intro_background_cut}")
+    val videoUri =
+        if (!isTablet)
+            Uri.parse("android.resource://${context.packageName}/${R.raw.intro_background_cut}")
+        else
+            Uri.parse("android.resource://${context.packageName}/${R.raw.intro_background}")
 
     var hasNotificationPermission by remember {
         mutableStateOf(
@@ -105,56 +111,120 @@ fun MainScreen(navController: NavController, currUser: SharedPreferences) {
             .fillMaxSize()
             .clipToBounds()
     ) {
-        VideoBackground(uri = videoUri)
+        VideoBackground(uri = videoUri, isTablet)
 
-        Column(
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier
-                .background(Color.Transparent)
-                .fillMaxSize(),
-        ) {
-            Text(
-                text = "SERIES\nTIME",
-                style = TextStyle(
-                    fontSize = 22.sp,
-                    lineHeight = 24.sp,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight(600),
-                    color = Color.White,
-                ),
-                modifier = Modifier.padding(top = 37.dp, start = 37.dp)
-            )
+        if (!isTablet) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .fillMaxSize(),
+            ) {
+                Text(
+                    text = "SERIES\nTIME",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        lineHeight = 24.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight(600),
+                        color = Color.White,
+                    ),
+                    modifier = Modifier.padding(top = 37.dp, start = 37.dp)
+                )
 
-            Spacer(modifier = Modifier.height(420.dp))
-            // TODO: sistema il testo e la freccina
-            Text(
-                text = annotatedText,
-                style = TextStyle(
-                    fontSize = 55.sp,
-                    lineHeight = 53.sp,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight(1000),
-                    color = Color.White,
-                ),
-                modifier = Modifier.padding(horizontal = 37.dp)
-            )
+                Spacer(modifier = Modifier.height(420.dp))
 
-            Image(
-                painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 300.dp)
-                    .size(75.dp)
-                    .clickable {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                Text(
+                    text = annotatedText,
+                    style = TextStyle(
+                        fontSize = 55.sp,
+                        lineHeight = 53.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight(1000),
+                        color = Color.White,
+                    ),
+                    modifier = Modifier.padding(horizontal = 37.dp)
+                )
+
+                Image(
+                    painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 300.dp)
+                        .size(75.dp)
+                        .clickable {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                            if (currUser.getLong("id", -1L) != -1L)
+                                navController.navigate(DestinationScreen.Home.route)
+                            else
+                                navController.navigate(DestinationScreen.Login.route)
                         }
-                        if (currUser.getLong("id", -1L) != -1L)
-                            navController.navigate(DestinationScreen.Home.route)
-                        else
-                            navController.navigate(DestinationScreen.Login.route)
-                    }
-            )
+                )
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .fillMaxSize(),
+            ) {
+                Text(
+                    text = "SERIES\nTIME",
+                    style = TextStyle(
+                        fontSize = 36.sp,
+                        lineHeight = 40.sp,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight(700),
+                        color = Color.White,
+                    ),
+                    modifier = Modifier.padding(top = 37.dp, start = 37.dp)
+                )
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .fillMaxSize(),
+            ) {
+                Spacer(modifier = Modifier.height(500.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().background(Color.Transparent),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = annotatedText,
+                        style = TextStyle(
+                            fontSize = 55.sp,
+                            lineHeight = 53.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight(1000),
+                            color = Color.White,
+                        ),
+                        modifier = Modifier.padding(horizontal = 37.dp).padding(start = 50.dp)
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(75.dp)
+                            .clickable {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                if (currUser.getLong("id", -1L) != -1L)
+                                    navController.navigate(DestinationScreen.Home.route)
+                                else
+                                    navController.navigate(DestinationScreen.Login.route)
+                            }
+                    )
+                }
+            }
         }
     }
 }

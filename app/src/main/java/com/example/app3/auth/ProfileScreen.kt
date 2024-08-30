@@ -509,99 +509,109 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, navController: 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, currUser: SharedPreferences, vm: FbViewModel, listVM: MyListViewModel) {
+fun ProfileScreen(navController: NavController, currUser: SharedPreferences, vm: FbViewModel, listVM: MyListViewModel, isTablet: Boolean) {
 
     val name = currUser.getString("name", "")
+    val photoUrl = currUser.getString("picture", "")
 
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    Scaffold (
-        modifier = Modifier
-            .nestedScroll(scrollBehaviour.nestedScrollConnection)
-            .background(darkBlue),
-        topBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "SERIES\nTIME",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        lineHeight = 24.sp,
-                        fontFamily = inter_font,
-                        fontWeight = FontWeight(700),
-                        color = Color.White,
-                    ),
+    if (!isTablet) {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehaviour.nestedScrollConnection)
+                .background(darkBlue),
+            topBar = {
+                Row(
                     modifier = Modifier
-                        .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
-                        .clickable { navController.navigate(DestinationScreen.Home.route) }
-                )
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Notification.route)
-                    }
+                        .fillMaxWidth()
+                        .background(darkBlue),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Notifications,
-                        tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
-                        contentDescription = "Go to notification page"
+                    Text(
+                        text = "SERIES\nTIME",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            lineHeight = 24.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight(700),
+                            color = Color.White,
+                        ),
+                        modifier = Modifier
+                            .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                            .clickable { navController.navigate(DestinationScreen.Home.route) }
                     )
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Notification.route)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
+                            contentDescription = "Go to notification page"
+                        )
+                    }
+                }
+            },
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue)
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Search.route)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.Search,
+                            tint = ourRed,
+                            contentDescription = "Go to search page"
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Favourite.route)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.Favorite,
+                            tint = ourRed,
+                            contentDescription = "Go to favourite page"
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { /* Do Nothing */ }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.AccountCircle,
+                            tint = ourRed,
+                            contentDescription = "Already in profile page"
+                        )
+                    }
                 }
             }
-        },
-        bottomBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue)
-                    .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-
-                ){
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Search.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Search,
-                        tint = ourRed,
-                        contentDescription = "Go to search page"
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Favourite.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Favorite,
-                        tint = ourRed,
-                        contentDescription = "Go to favourite page"
-                    )
-                }
-
-                IconButton(
-                    onClick = { /* Do Nothing */}
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.AccountCircle,
-                        tint = ourRed,
-                        contentDescription = "Already in profile page"
-                    )
-                }
-            }
+        ) { innerPadding ->
+            ScrollProfilePage(innerPadding, name + "", navController, currUser, vm)
         }
-    ) {
-        innerPadding -> ScrollProfilePage(innerPadding, name + "", navController, currUser, vm)
+    } else {
+        Row (
+            modifier = Modifier.fillMaxSize()
+        ){
+            LeftMenu(DestinationScreen.Profile, navController, photoUrl, listVM)
+            ScrollProfilePage(PaddingValues(0.dp), name + "", navController, currUser, vm)
+        }
     }
 }

@@ -69,6 +69,7 @@ import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 import kotlinx.coroutines.delay
 
+// TODO: Check tablet when Server is ok
 @Composable
 fun IndicatorDots(size: Int, currentIndex: Int) {
     Row(
@@ -119,7 +120,7 @@ fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) 
 
             viewState.error != null -> {
                 //Text(text = "Error occurred!")
-                Text(text = "${viewState.error}")
+                Text(text = "${viewState.error}", color = Color.White)
             }
 
             else -> {
@@ -315,7 +316,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
 
                 recommenderState.error != null -> {
                     //Text(text = "Error occurred!")
-                    Text(text = "${recommenderState.error}", textAlign = TextAlign.Center)
+                    Text(text = "${recommenderState.error}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                 }
 
                 else -> {
@@ -359,7 +360,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
 
                 viewState.error != null -> {
                     //Text(text = "Error occurred!")
-                    Text(text = "${viewState.error}", textAlign = TextAlign.Center)
+                    Text(text = "${viewState.error}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                 }
 
                 else -> {
@@ -381,7 +382,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuccessScreen(navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
+fun HomeScreen(navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel, isTablet: Boolean) {
     val userId = currUser.getLong("id", -1L)
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -392,109 +393,119 @@ fun SuccessScreen(navController: NavController, viewState: MainViewModel.ReplySt
             recommenderVM.getRecommended(userId)
     }
 
-    Scaffold (
-        modifier = Modifier
-            .nestedScroll(scrollBehaviour.nestedScrollConnection)
-            .background(darkBlue),
-        topBar = {
-             Row (
-                 modifier = Modifier
-                     .fillMaxWidth()
-                     .background(darkBlue),
-                 verticalAlignment = Alignment.CenterVertically,
-                 horizontalArrangement = Arrangement.SpaceBetween
-             ) {
-                 Text(
-                     text = "SERIES\nTIME",
-                     style = TextStyle(
-                         fontSize = 20.sp,
-                         lineHeight = 24.sp,
-                         fontFamily = inter_font,
-                         fontWeight = FontWeight(700),
-                         color = Color.White,
-                     ),
-                     modifier = Modifier
-                         .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
-                         .clickable { navController.navigate(DestinationScreen.Home.route) }
-                 )
-                 IconButton(
-                     onClick = {
-                         navController.navigate(DestinationScreen.Notification.route)
-                     }
-                 ) {
-                     Icon(
-                         imageVector = Icons.Filled.Notifications,
-                         tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
-                         contentDescription = "Go to notification page"
-                     )
-                 }
-             }
-        },
-        bottomBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(darkBlue)
-                    .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-
-            ){
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Search.route)
-                    }
+    if (!isTablet) {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehaviour.nestedScrollConnection)
+                .background(darkBlue),
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Search,
-                        tint = ourRed,
-                        contentDescription = "Go to search page"
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Favourite.route)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        imageVector = Icons.Filled.Favorite,
-                        tint = ourRed,
-                        contentDescription = "Go to favourite page"
-                    )
-                }
-
-                if (photoUrl != null && photoUrl != "")
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(photoUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = null,
+                    Text(
+                        text = "SERIES\nTIME",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            lineHeight = 24.sp,
+                            fontFamily = inter_font,
+                            fontWeight = FontWeight(700),
+                            color = Color.White,
+                        ),
                         modifier = Modifier
-                            .clickable { navController.navigate(DestinationScreen.Profile.route) }
-                            .padding(horizontal = 11.dp)
-                            .size(25.dp)
-                            .clip(CircleShape)
+                            .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                            .clickable { navController.navigate(DestinationScreen.Home.route) }
                     )
-                else
                     IconButton(
                         onClick = {
-                            navController.navigate(DestinationScreen.Profile.route)
+                            navController.navigate(DestinationScreen.Notification.route)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            tint = if (listVM.items.isNotEmpty()) ourYellow else Color.White,
+                            contentDescription = "Go to notification page"
+                        )
+                    }
+                }
+            },
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(darkBlue)
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Search.route)
                         }
                     ) {
                         Icon(
                             modifier = Modifier.size(25.dp),
-                            imageVector = Icons.Filled.AccountCircle,
+                            imageVector = Icons.Filled.Search,
                             tint = ourRed,
-                            contentDescription = "Localized description"
+                            contentDescription = "Go to search page"
                         )
                     }
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Favourite.route)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            imageVector = Icons.Filled.Favorite,
+                            tint = ourRed,
+                            contentDescription = "Go to favourite page"
+                        )
+                    }
+
+                    if (photoUrl != null && photoUrl != "")
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(photoUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clickable { navController.navigate(DestinationScreen.Profile.route) }
+                                .padding(horizontal = 11.dp)
+                                .size(25.dp)
+                                .clip(CircleShape)
+                        )
+                    else {
+                        IconButton(
+                            onClick = {
+                                navController.navigate(DestinationScreen.Profile.route)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(25.dp),
+                                imageVector = Icons.Filled.AccountCircle,
+                                tint = ourRed,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                    }
+                }
             }
+        ) { innerPadding ->
+            SeriesScreen(innerPadding, navController, viewState, vm, currUser, recommenderVM)
         }
-    ) {
-        innerPadding -> SeriesScreen(innerPadding, navController, viewState, vm, currUser, recommenderVM)
+    } else {
+        Row (
+            modifier = Modifier.fillMaxSize()
+        ){
+            LeftMenu(DestinationScreen.Home, navController, photoUrl, listVM)
+            SeriesScreen(PaddingValues(0.dp), navController, viewState, vm, currUser, recommenderVM)
+        }
     }
 }
