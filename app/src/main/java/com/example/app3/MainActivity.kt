@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -101,6 +102,7 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
     }
 
     val apiViewModel: MainViewModel = viewModel()
+    val viewState by apiViewModel.seriesState
 
     val listVM: MyListViewModel = viewModel()
 
@@ -123,13 +125,13 @@ fun AuthenticationApp(callbackManager: CallbackManager) {
             LoginScreen(navController, vm, callbackManager, currUser)
         }
         composable(DestinationScreen.Home.route) {
-            SuccessScreen(navController, apiViewModel, vm, currUser, listVM, recommenderVM)
+            SuccessScreen(navController, viewState, vm, currUser, listVM, recommenderVM)
         }
         composable(DestinationScreen.Favourite.route) {
             FavouriteScreen(navController, vm, currUser, listVM)
         }
         composable(DestinationScreen.Profile.route) {
-            ProfileScreen(navController, currUser, listVM)
+            ProfileScreen(navController, currUser, vm, listVM)
         }
         composable(DestinationScreen.Detail.route) { backStackEntry ->
             val seriesId = backStackEntry.arguments?.getString("seriesId")

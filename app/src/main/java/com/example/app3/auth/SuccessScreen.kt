@@ -43,7 +43,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,8 +68,6 @@ import com.example.app3.ui.theme.inter_font
 import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 import kotlinx.coroutines.delay
-
-// TODO: sistemare richieste al server che sono troppe e danno problemi
 
 @Composable
 fun IndicatorDots(size: Int, currentIndex: Int) {
@@ -303,7 +300,6 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
                 .padding(start = 40.dp)
                 .padding(vertical = 15.dp)
         )
-        // TODO: capire se mettere la chiamata al recommender nella pagina (aggiorna ogni volta) o nella main activity
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -385,17 +381,15 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuccessScreen(navController: NavController,apiViewModel: MainViewModel, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
-
+fun SuccessScreen(navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, recommenderVM: RecommenderViewModel) {
     val userId = currUser.getLong("id", -1L)
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    val viewState by apiViewModel.seriesState
-
     LaunchedEffect(userId) {
         vm.getFavorites(userId)
-        recommenderVM.getRecommended(userId)
+        if (recommenderVM.recommenderState.value.list.isEmpty())
+            recommenderVM.getRecommended(userId)
     }
 
     Scaffold (

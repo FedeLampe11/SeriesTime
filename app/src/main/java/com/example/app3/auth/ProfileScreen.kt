@@ -4,6 +4,14 @@ import android.annotation.SuppressLint
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,10 +22,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
@@ -46,7 +58,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -58,6 +72,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app3.DestinationScreen
+import com.example.app3.FbViewModel
 import com.example.app3.R
 import com.example.app3.ui.theme.darkBlue
 import com.example.app3.ui.theme.inter_font
@@ -67,13 +82,37 @@ import com.example.app3.ui.theme.switch_colors
 
 @SuppressLint("WorldReadableFiles")
 @Composable
-fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: String?, navController: NavController, currUser: SharedPreferences) {
+fun ScrollProfilePage(innerPadding: PaddingValues, name: String, navController: NavController, currUser: SharedPreferences, vm: FbViewModel) {
 
     val context = LocalContext.current
+    val userId = currUser.getLong("id", -1L)
+    val photoUrl = currUser.getString("picture", "")
+
+    val isUploading = remember { mutableStateOf(false) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var imgUrl by remember { mutableStateOf("") }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            bitmap = if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            } else {
+                val source = ImageDecoder.createSource(context.contentResolver, it)
+                ImageDecoder.decodeBitmap(source)
+            }
+        }
+    }
+    val cLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) {
+        bitmap = it
+    }
+    var showDialog by remember { mutableStateOf(false) }
+    var toUpdate by remember { mutableStateOf(false) }
 
     val preferences = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
     val editor = preferences.edit()
-    // Initialize the preferences only if they are not already set
     LaunchedEffect(Unit) {
         if (!preferences.contains("ReceiveNotifications"))
             editor.putBoolean("ReceiveNotifications", true)
@@ -93,10 +132,11 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
             .background(Color.Black)
             .fillMaxSize()
             .padding(innerPadding)
-            .padding(top = 20.dp),
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Spacer(modifier = Modifier.height(20.dp))
         if (photoUrl != null && photoUrl != "") {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
@@ -107,17 +147,201 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
                 modifier = Modifier
                     .size(150.dp)
                     .clip(CircleShape)
+                    .clickable { showDialog = true }
             )
+            if (showDialog) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .width(300.dp)
+                        .height(100.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.DarkGray)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(start = 53.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.baseline_camera_alt_24),
+                            contentDescription = "Open Camera",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable {
+                                    cLauncher.launch()
+                                    showDialog = false
+                                    toUpdate = true
+                                }
+                        )
+                        Text(
+                            text = "Camera",
+                            color = Color.White,
+                            fontFamily = inter_font
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(30.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.baseline_image_24),
+                            contentDescription = "Open Gallery",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable {
+                                    launcher.launch("image/*")
+                                    toUpdate = true
+                                }
+                        )
+                        Text(
+                            text = "Gallery",
+                            color = Color.White,
+                            fontFamily = inter_font
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 35.dp, bottom = 75.dp)
+                    ) {
+                        Text(
+                            text = "x",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .clickable { showDialog = false }
+                        )
+                    }
+                }
+            }
         } else {
-            Image(
-                painter = painterResource(id = R.drawable.baseline_person_24),
-                contentDescription = null,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape),
-                colorFilter = ColorFilter.tint(Color.White)
-            )
+                    .fillMaxSize()
+            ) {
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap!!.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .size(150.dp)
+                            .clickable { showDialog = true }
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_person_24),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(Color.LightGray),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.DarkGray)
+                            .size(150.dp)
+                            .clickable { showDialog = true }
+                    )
+                }
+            }
+            Column(
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 10.dp)
+            ) {
+                if (showDialog) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .width(300.dp)
+                            .height(100.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.DarkGray)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(start = 53.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_camera_alt_24),
+                                contentDescription = "Open Camera",
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clickable {
+                                        cLauncher.launch()
+                                        showDialog = false
+                                        toUpdate = true
+                                    }
+                            )
+                            Text(
+                                text = "Camera",
+                                color = Color.White,
+                                fontFamily = inter_font
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(30.dp))
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ){
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_image_24),
+                                contentDescription = "Open Gallery",
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clickable {
+                                        launcher.launch("image/*")
+                                        toUpdate = true
+                                    }
+                            )
+                            Text(
+                                text = "Gallery",
+                                color = Color.White,
+                                fontFamily = inter_font
+                            )
+                        }
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 35.dp, bottom = 75.dp)
+                        ) {
+                            Text(
+                                text = "x",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .clickable { showDialog = false }
+                            )
+                        }
+                    }
+                }
+            }
         }
+
+        if (toUpdate) {
+            isUploading.value = true
+            bitmap.let { bitmap ->
+                if (bitmap != null) {
+                    isUploading.value = false
+                    uploadImageToFirebase(bitmap) { success, imageUrl ->
+                        isUploading.value = false
+                        if (success) {
+                            imageUrl.let {
+                                imgUrl = it
+                                vm.updateProfilePicture(userId, imgUrl)
+                                val edit = currUser.edit()
+                                edit.putString("picture", imgUrl)
+                                edit.apply()
+                                toUpdate = false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (name != "null") {
             Text(
                 text = name,
@@ -279,15 +503,15 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, photoUrl: Strin
                 fontFamily = inter_font,
             )
         }
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, currUser: SharedPreferences, listVM: MyListViewModel) {
+fun ProfileScreen(navController: NavController, currUser: SharedPreferences, vm: FbViewModel, listVM: MyListViewModel) {
 
     val name = currUser.getString("name", "")
-    val photoUrl = currUser.getString("picture", "")
 
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -378,6 +602,6 @@ fun ProfileScreen(navController: NavController, currUser: SharedPreferences, lis
             }
         }
     ) {
-        innerPadding -> ScrollProfilePage(innerPadding, name + "", photoUrl, navController, currUser)
+        innerPadding -> ScrollProfilePage(innerPadding, name + "", navController, currUser, vm)
     }
 }

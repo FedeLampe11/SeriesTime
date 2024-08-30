@@ -11,7 +11,7 @@ private val retrofit = Retrofit.Builder().baseUrl("http://kotlin-backend-env.eba
     .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
     .build()
 
-val userService = retrofit.create(APIUser::class.java)
+val userService: APIUser = retrofit.create(APIUser::class.java)
 
 interface APIUser {
     @POST("v1/users")
@@ -19,6 +19,9 @@ interface APIUser {
 
     @GET("v1/users")
     suspend fun loginUser(@Query ("email") email: String, @Query("password") password: String): UserAuthReply
+
+    @POST("v1/users/image")
+    suspend fun updateProfilePicture(@Body body: Map<String, String>)
 
     @GET("v1/favorites")
     suspend fun getFavourite(@Query ("user_id") userId: Long): List<Details>

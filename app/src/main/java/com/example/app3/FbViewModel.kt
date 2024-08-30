@@ -22,20 +22,19 @@ class FbViewModel @Inject constructor(
     private val _userState = mutableStateOf(UserReplyState())
     val userState: State<UserReplyState> = _userState
 
+    private val _profilePicState = mutableStateOf(ProfilePictureState())
+
     private val _favoriteState = mutableStateOf(FavoriteReplyState())
     val favoriteState: State<FavoriteReplyState> = _favoriteState
 
     private val _modifyFavoriteState = mutableStateOf(ModifyFavoriteState())
-    val modifyFavoriteState: State<ModifyFavoriteState> = _modifyFavoriteState
 
     private val _watchedState = mutableStateOf(WatchedReplyState())
     val watchedState: State<WatchedReplyState> = _watchedState
 
     private val _addWatchedState = mutableStateOf(ModifyWatchedState())
-    val addWatchedState: State<ModifyWatchedState> = _addWatchedState
 
     private val _removeWatchedState = mutableStateOf(ModifyWatchedState())
-    val removeWatchedState: State<ModifyWatchedState> = _removeWatchedState
 
     fun onSignUp(name: String, email: String, pass: String, profilePicture: String?) {
         val body = mapOf(
@@ -109,6 +108,28 @@ class FbViewModel @Inject constructor(
                 )
             }
             inProgress.value = false
+        }
+    }
+
+    fun updateProfilePicture(userId: Long, url: String) {
+        viewModelScope.launch{
+            try{
+                val body = mapOf(
+                    "userId" to userId.toString(),
+                    "profilePicture" to url
+                )
+                userService.updateProfilePicture(body)
+
+                _profilePicState.value = _profilePicState.value.copy(
+                    loading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _profilePicState.value = _profilePicState.value.copy(
+                    loading = false,
+                    error = "Error updating picture ${e.message}"
+                )
+            }
         }
     }
 
@@ -232,12 +253,12 @@ class FbViewModel @Inject constructor(
         }
     }
 
-    fun handleException(exception: Exception? = null, customMessage: String = "") {
+    /*fun handleException(exception: Exception? = null, customMessage: String = "") {
         exception?.printStackTrace()
         val errorMsg = exception?.localizedMessage ?: ""
         val message = if (customMessage.isEmpty()) errorMsg else "$customMessage: $errorMsg"
         popupNotification.value = Event(message)
-    }
+    }*/
 
     data class UserReplyState(
         val loading: Boolean = true,
@@ -245,8 +266,14 @@ class FbViewModel @Inject constructor(
         val error: String? = null
     )
 
-    data class FavoriteReplyState(
+    data class ProfilePictureState(
         val loading: Boolean = true,
+        val url: String? = null,
+        val error: String? = null
+    )
+
+    data class FavoriteReplyState(
+        var loading: Boolean = true,
         val list: List<Details> = emptyList(),
         val error: String? = null
     )

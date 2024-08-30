@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -218,57 +219,59 @@ fun ScrollFavouritePage(innerPadding: PaddingValues, navController: NavControlle
             )
         }
 
-        /*when (selectedText) {
-            "Addition Date" -> favListCopy = favList
-            "Start Date" -> favListCopy.sortedBy { it.startDate }
-            "Title" -> favListCopy.sortedBy { it.name }
-        }*/
-
         Spacer(modifier = Modifier.height(15.dp))
-        if (favList.isNotEmpty()) {
-            LazyColumn (
+        if (vm.favoriteState.value.loading) {
+            Box(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                items(sortedList) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        SeriesRow(it, navController)
-                    }
-                }
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = ourRed)
             }
         } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Seems like you don't like any series, go check some to add!",
-                    color = ourRed,
-                    fontFamily = inter_font,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(horizontal = 30.dp)
-                        .padding(vertical = 20.dp)
-                )
-                IconButton(
-                    onClick = {
-                        navController.navigate(DestinationScreen.Search.route)
-                    }
+            if (favList.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        modifier = Modifier.size(40.dp),
-                        imageVector = Icons.Filled.Search,
-                        tint = Color.White,
-                        contentDescription = "Go to search page"
+                    items(sortedList) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            SeriesRow(it, navController)
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Seems like you don't like any series, go check some to add!",
+                        color = ourRed,
+                        fontFamily = inter_font,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 30.dp)
+                            .padding(vertical = 20.dp)
                     )
+                    IconButton(
+                        onClick = {
+                            navController.navigate(DestinationScreen.Search.route)
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(40.dp),
+                            imageVector = Icons.Filled.Search,
+                            tint = Color.White,
+                            contentDescription = "Go to search page"
+                        )
+                    }
                 }
             }
-
         }
     }
 }
@@ -281,6 +284,7 @@ fun FavouriteScreen (navController: NavController, vm: FbViewModel, currUser: Sh
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     LaunchedEffect(userId) {
+        vm.favoriteState.value.loading = true
         vm.getFavorites(userId)
     }
 
