@@ -206,8 +206,7 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                     }
 
                     recommenderState.error != null -> {
-                        //Text(text = "Error occurred!")
-                        Text(text = "${recommenderState.error}", textAlign = TextAlign.Center)
+                        Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                     }
 
                     else -> {
@@ -242,8 +241,7 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
                     }
 
                     viewState.error != null -> {
-                        //Text(text = "Error occurred!")
-                        Text(text = "${viewState.error}")
+                        Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                     }
 
                     else -> {
@@ -540,8 +538,7 @@ fun TSearchScreen(navController: NavController, apiViewModel: MainViewModel, rec
                     }
 
                     recommenderState.error != null -> {
-                        //Text(text = "Error occurred!")
-                        Text(text = "${recommenderState.error}", textAlign = TextAlign.Center)
+                        Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                     }
 
                     else -> {
@@ -576,8 +573,7 @@ fun TSearchScreen(navController: NavController, apiViewModel: MainViewModel, rec
                     }
 
                     viewState.error != null -> {
-                        //Text(text = "Error occurred!")
-                        Text(text = "${viewState.error}")
+                        Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                     }
 
                     else -> {

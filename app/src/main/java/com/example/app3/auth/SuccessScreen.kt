@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +70,6 @@ import com.example.app3.ui.theme.ourRed
 import com.example.app3.ui.theme.ourYellow
 import kotlinx.coroutines.delay
 
-// TODO: Check tablet when Server is ok
 @Composable
 fun IndicatorDots(size: Int, currentIndex: Int) {
     Row(
@@ -93,7 +93,7 @@ fun IndicatorDots(size: Int, currentIndex: Int) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) {
+fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState, isTablet: Boolean) {
     val numberOfSeries = 5
     val pagerState = rememberPagerState(pageCount = { numberOfSeries })
     val topSeries = viewState.obj.take(numberOfSeries)
@@ -119,8 +119,7 @@ fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) 
             }
 
             viewState.error != null -> {
-                //Text(text = "Error occurred!")
-                Text(text = "${viewState.error}", color = Color.White)
+                Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
             }
 
             else -> {
@@ -134,7 +133,7 @@ fun Carousel(navController: NavController, viewState: MainViewModel.ReplyState) 
                             .padding(bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CarouselItem(topSeries[page], navController)
+                        CarouselItem(topSeries[page], navController, isTablet)
                     }
                 }
                 IndicatorDots(size = numberOfSeries, currentIndex = pagerState.currentPage)
@@ -177,29 +176,47 @@ fun SeriesItem(seriesDetails: Details, showName: Boolean, navController: NavCont
 }
 
 @Composable
-fun CarouselItem(detail: Details, navController: NavController) {
+fun CarouselItem(detail: Details, navController: NavController, isTablet: Boolean) {
+    val imagePainter = rememberAsyncImagePainter(detail.thumbnail)
+    val route = remember(detail.id) { DestinationScreen.Detail.createRoute(detail.id) }
+
     Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxHeight()
-            .clickable {
-                navController.navigate(DestinationScreen.Detail.createRoute(detail.id))
+        modifier = if (!isTablet) {
+            Modifier
+                .padding(8.dp)
+                .fillMaxHeight()
+                .clickable {
+                    navController.navigate(route)
+                }
+        } else {
+            Modifier
+                .padding(8.dp)
+                .height(350.dp)
+                .clickable {
+                    navController.navigate(route)
+                }
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = rememberAsyncImagePainter(detail.thumbnail),
+            painter = imagePainter,
             contentDescription = "Series Thumbnail",
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .padding(bottom = 4.dp)
+            modifier = if (!isTablet) {
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .padding(bottom = 4.dp)
+            } else {
+                Modifier
+                    .aspectRatio(1f)
+                    .padding(bottom = 4.dp)
+            }
         )
     }
 }
 
 @Composable
-fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, recommenderVM: RecommenderViewModel){
+fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, viewState: MainViewModel.ReplyState, vm: FbViewModel, currUser: SharedPreferences, recommenderVM: RecommenderViewModel, isTablet: Boolean){
     val context = LocalContext.current
 
     val recommenderState = recommenderVM.recommenderState.value
@@ -224,7 +241,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
             style = TextStyle(lineHeight = 35.sp)
         )
 
-        Carousel(navController, viewState)
+        Carousel(navController, viewState, isTablet)
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
@@ -315,8 +332,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
                 }
 
                 recommenderState.error != null -> {
-                    //Text(text = "Error occurred!")
-                    Text(text = "${recommenderState.error}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
+                    Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                 }
 
                 else -> {
@@ -359,8 +375,7 @@ fun SeriesScreen(innerPadding: PaddingValues, navController: NavController, view
                 }
 
                 viewState.error != null -> {
-                    //Text(text = "Error occurred!")
-                    Text(text = "${viewState.error}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
+                    Text(text = "OPS, an error occurred!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), color = Color.White)
                 }
 
                 else -> {
@@ -498,14 +513,14 @@ fun HomeScreen(navController: NavController, viewState: MainViewModel.ReplyState
                 }
             }
         ) { innerPadding ->
-            SeriesScreen(innerPadding, navController, viewState, vm, currUser, recommenderVM)
+            SeriesScreen(innerPadding, navController, viewState, vm, currUser, recommenderVM, false)
         }
     } else {
         Row (
             modifier = Modifier.fillMaxSize()
         ){
             LeftMenu(DestinationScreen.Home, navController, photoUrl, listVM)
-            SeriesScreen(PaddingValues(0.dp), navController, viewState, vm, currUser, recommenderVM)
+            SeriesScreen(PaddingValues(0.dp), navController, viewState, vm, currUser, recommenderVM, true)
         }
     }
 }

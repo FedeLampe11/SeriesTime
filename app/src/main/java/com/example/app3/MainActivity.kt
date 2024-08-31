@@ -156,7 +156,7 @@ fun AuthenticationApp(callbackManager: CallbackManager, isTablet: Boolean) {
             SearchScreen(navController, currUser, listVM, recommenderVM, isTablet)
         }
         composable(DestinationScreen.Notification.route) {
-            NotificationScreen(navController, vm, currUser, listVM, isTablet)
+            NotificationScreen(navController, currUser, listVM, isTablet)
         }
         composable(DestinationScreen.Statistics.route) {
             StatisticsScreen(navController, vm, listVM, currUser, isTablet)

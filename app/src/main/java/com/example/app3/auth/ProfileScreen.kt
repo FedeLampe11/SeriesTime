@@ -82,7 +82,7 @@ import com.example.app3.ui.theme.switch_colors
 
 @SuppressLint("WorldReadableFiles")
 @Composable
-fun ScrollProfilePage(innerPadding: PaddingValues, name: String, navController: NavController, currUser: SharedPreferences, vm: FbViewModel) {
+fun ScrollProfilePage(innerPadding: PaddingValues, name: String, navController: NavController, currUser: SharedPreferences, vm: FbViewModel, isTablet: Boolean) {
 
     val context = LocalContext.current
     val userId = currUser.getLong("id", -1L)
@@ -449,27 +449,29 @@ fun ScrollProfilePage(innerPadding: PaddingValues, name: String, navController: 
             )
         }
 
-        Button(
-            onClick = { navController.navigate(DestinationScreen.Statistics.route) },
-            colors = ButtonColors(
-                containerColor = ourRed,
-                contentColor = Color.White,
-                disabledContainerColor = ourRed,
-                disabledContentColor = Color.White
-            ),
-            modifier = Modifier.padding(top = 15.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.baseline_format_list_numbered_24),
-                contentDescription = "Go to statistics page",
-            )
+        if (!isTablet) {
+            Button(
+                onClick = { navController.navigate(DestinationScreen.Statistics.route) },
+                colors = ButtonColors(
+                    containerColor = ourRed,
+                    contentColor = Color.White,
+                    disabledContainerColor = ourRed,
+                    disabledContentColor = Color.White
+                ),
+                modifier = Modifier.padding(top = 15.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_format_list_numbered_24),
+                    contentDescription = "Go to statistics page",
+                )
 
-            Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-            Text(
-                text = "Statistics",
-                fontFamily = inter_font,
-            )
+                Text(
+                    text = "Statistics",
+                    fontFamily = inter_font,
+                )
+            }
         }
 
         Button(
@@ -604,14 +606,14 @@ fun ProfileScreen(navController: NavController, currUser: SharedPreferences, vm:
                 }
             }
         ) { innerPadding ->
-            ScrollProfilePage(innerPadding, name + "", navController, currUser, vm)
+            ScrollProfilePage(innerPadding, name + "", navController, currUser, vm, false)
         }
     } else {
         Row (
             modifier = Modifier.fillMaxSize()
         ){
             LeftMenu(DestinationScreen.Profile, navController, photoUrl, listVM)
-            ScrollProfilePage(PaddingValues(0.dp), name + "", navController, currUser, vm)
+            ScrollProfilePage(PaddingValues(0.dp), name + "", navController, currUser, vm, true)
         }
     }
 }

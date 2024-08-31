@@ -167,10 +167,7 @@ fun NotificationRow(details: Details, navController: NavController, listVM: MyLi
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotificationPage(innerPadding: PaddingValues, navController: NavController, listVM: MyListViewModel, vm: FbViewModel) {
-
-    val context = LocalContext.current
-
+fun NotificationPage(innerPadding: PaddingValues, navController: NavController, listVM: MyListViewModel) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -196,11 +193,7 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
                         color = Color.White,
                         fontFamily = inter_font,
                         fontSize = 20.sp,
-                        style = TextStyle(fontWeight = FontWeight.Normal),
-                        modifier = Modifier.clickable {
-                            // Only for demonstration purposes
-                            sendNotification(context, vm.favoriteState.value.list[0], listVM)
-                        }
+                        style = TextStyle(fontWeight = FontWeight.Normal)
                     )
                 }
             }
@@ -211,7 +204,7 @@ fun NotificationPage(innerPadding: PaddingValues, navController: NavController, 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: SharedPreferences, listVM: MyListViewModel, isTablet: Boolean) {
+fun NotificationScreen(navController: NavController, currUser: SharedPreferences, listVM: MyListViewModel, isTablet: Boolean) {
 
     val photoUrl = currUser.getString("picture", "")
     val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -317,23 +310,21 @@ fun NotificationScreen(navController: NavController, vm: FbViewModel, currUser: 
                 }
             }
         ) { innerPadding ->
-            NotificationPage(innerPadding, navController, listVM, vm)
+            NotificationPage(innerPadding, navController, listVM)
         }
     } else {
         Row (
             modifier = Modifier.fillMaxSize()
         ){
             LeftMenu(DestinationScreen.Notification, navController, photoUrl, listVM)
-            TNotScreen(navController, listVM, vm)
+            TNotScreen(navController, listVM)
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TNotScreen(navController: NavController, listVM: MyListViewModel, vm: FbViewModel) {
-    val context = LocalContext.current
-
+fun TNotScreen(navController: NavController, listVM: MyListViewModel) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -376,10 +367,6 @@ fun TNotScreen(navController: NavController, listVM: MyListViewModel, vm: FbView
                         fontFamily = inter_font,
                         fontSize = 20.sp,
                         style = TextStyle(fontWeight = FontWeight.Normal),
-                        modifier = Modifier.clickable {
-                            // Only for demonstration purposes
-                            sendNotification(context, vm.favoriteState.value.list[0], listVM)
-                        }
                     )
                 }
             }

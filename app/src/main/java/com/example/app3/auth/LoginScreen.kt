@@ -83,7 +83,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 // TODO: check errorDialog on phone
-// TODO: change graphics on tablet?
 @Composable
 fun ErrorDialog(
     errorMessage: String,

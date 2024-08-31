@@ -304,7 +304,6 @@ fun TStatScreen(vm: FbViewModel) {
                 fontWeight = FontWeight.Bold,
                 fontFamily = inter_font,
             )
-            Spacer(modifier = Modifier.height(60.dp))
             Row (
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.Center,
