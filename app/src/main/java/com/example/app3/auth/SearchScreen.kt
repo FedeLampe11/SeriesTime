@@ -85,6 +85,9 @@ fun ScrollSearchPage(innerPadding: PaddingValues, navController: NavController, 
     val viewState = apiViewModel.searchState.value
     val recommenderState = recommenderVM.recommenderState.value
 
+    if (viewState.obj.isNotEmpty())
+        alreadySearched = true
+
     var toggle = false
 
     Column (
@@ -417,6 +420,9 @@ fun TSearchScreen(navController: NavController, apiViewModel: MainViewModel, rec
 
     val viewState = apiViewModel.searchState.value
     val recommenderState = recommenderVM.recommenderState.value
+
+    if (viewState.obj.isNotEmpty())
+        alreadySearched = true
 
     var toggle = false
 
