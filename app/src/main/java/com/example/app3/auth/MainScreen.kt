@@ -77,7 +77,7 @@ fun VideoBackground(uri: Uri, isTablet: Boolean) {
 }
 
 @Composable
-fun MainScreen(navController: NavController, currUser: SharedPreferences, isTablet: Boolean) {
+fun MainScreen(navController: NavController, isTablet: Boolean) {
 
     val context = LocalContext.current
 
@@ -148,7 +148,7 @@ fun MainScreen(navController: NavController, currUser: SharedPreferences, isTabl
 
                 Image(
                     painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
-                    contentDescription = null,
+                    contentDescription = "Arrow",
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 300.dp)
@@ -157,10 +157,7 @@ fun MainScreen(navController: NavController, currUser: SharedPreferences, isTabl
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }
-                            if (currUser.getLong("id", -1L) != -1L)
-                                navController.navigate(DestinationScreen.Home.route)
-                            else
-                                navController.navigate(DestinationScreen.Login.route)
+                            navController.navigate(DestinationScreen.Login.route)
                         }
                 )
             }
@@ -210,17 +207,14 @@ fun MainScreen(navController: NavController, currUser: SharedPreferences, isTabl
 
                     Image(
                         painter = painterResource(id = R.drawable.sharp_arrow_forward_ios_24),
-                        contentDescription = null,
+                        contentDescription = "Arrow",
                         modifier = Modifier
                             .size(75.dp)
                             .clickable {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 }
-                                if (currUser.getLong("id", -1L) != -1L)
-                                    navController.navigate(DestinationScreen.Home.route)
-                                else
-                                    navController.navigate(DestinationScreen.Login.route)
+                                navController.navigate(DestinationScreen.Login.route)
                             }
                     )
                 }

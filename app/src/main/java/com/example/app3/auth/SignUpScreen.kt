@@ -106,7 +106,7 @@ fun ImageInsertionButton(bitmap: Bitmap?, launcher: ManagedActivityResultLaunche
         if (bitmap != null) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
+                contentDescription = "Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
@@ -116,7 +116,7 @@ fun ImageInsertionButton(bitmap: Bitmap?, launcher: ManagedActivityResultLaunche
         } else {
             Image(
                 painter = painterResource(id = R.drawable.baseline_person_24),
-                contentDescription = null,
+                contentDescription = "Image",
                 colorFilter = ColorFilter.tint(Color.LightGray),
                 modifier = Modifier
                     .clip(CircleShape)

@@ -129,13 +129,13 @@ fun AuthenticationApp(callbackManager: CallbackManager, isTablet: Boolean) {
 
     NavHost(navController = navController, startDestination = startPage) {
         composable(DestinationScreen.Main.route) {
-            MainScreen(navController, currUser, isTablet)
+            MainScreen(navController, isTablet)
         }
         composable(DestinationScreen.SignUp.route) {
-            SignUpScreen(navController, vm, currUser, )
+            SignUpScreen(navController, vm, currUser)
         }
         composable(DestinationScreen.Login.route) {
-            LoginScreen(navController, vm, callbackManager, currUser, )
+            LoginScreen(navController, vm, callbackManager, currUser)
         }
         composable(DestinationScreen.Home.route) {
             HomeScreen(navController, viewState, vm, currUser, listVM, recommenderVM, isTablet)
