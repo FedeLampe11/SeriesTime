@@ -404,8 +404,7 @@ fun HomeScreen(navController: NavController, viewState: MainViewModel.ReplyState
 
     LaunchedEffect(userId) {
         vm.getFavorites(userId)
-        if (recommenderVM.recommenderState.value.list.isEmpty())
-            recommenderVM.getRecommended(userId)
+        recommenderVM.getRecommended(userId)
     }
 
     if (!isTablet) {
